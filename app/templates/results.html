@@ -1,0 +1,144 @@
+{% extends "base.html" %}
+
+{% block title %}Cancer Detection — Results{% endblock %}
+
+{% block content %}
+<div class="results-container">
+
+    {% if error %}
+    <!-- Error State -->
+    <div class="glass-card error-card">
+        <div class="error-icon">❌</div>
+        <h3>Analysis Error</h3>
+        <p>{{ error }}</p>
+        <a href="/" class="back-btn">← Try Again</a>
+    </div>
+
+    {% elif prediction %}
+    <!-- Results Header -->
+    <div class="results-header">
+        <a href="/" class="back-link">← New Analysis</a>
+        <h2 class="results-title">Analysis Complete</h2>
+        <p class="results-subtitle">Model: <strong>{{ model_name }}</strong> · File: {{ filename }}</p>
+    </div>
+
+    <div class="results-grid">
+        <!-- Prediction Card -->
+        <div class="glass-card prediction-card {{ 'cancerous' if prediction.class == 'Cancerous' else 'normal' }}">
+            <div class="prediction-badge">
+                {% if prediction.class == 'Normal' %}
+                    <div class="badge-icon normal-icon">✓</div>
+                {% else %}
+                    <div class="badge-icon cancerous-icon">!</div>
+                {% endif %}
+            </div>
+
+            <div class="prediction-result">
+                <span class="prediction-label">Classification</span>
+                <h3 class="prediction-class {{ prediction.class|lower }}">
+                    {{ prediction.class }}
+                </h3>
+            </div>
+
+            <!-- Confidence Gauge -->
+            <div class="confidence-section">
+                <span class="confidence-label">Confidence</span>
+                <div class="confidence-gauge">
+                    <div class="gauge-track">
+                        <div class="gauge-fill {{ prediction.class|lower }}"
+                             style="width: 0%"
+                             data-target="{{ prediction.confidence }}">
+                        </div>
+                    </div>
+                    <span class="confidence-value" data-target="{{ prediction.confidence }}">0%</span>
+                </div>
+            </div>
+
+            <!-- Details -->
+            <div class="prediction-details">
+                <div class="detail-row">
+                    <span class="detail-key">Probability</span>
+                    <span class="detail-value">{{ prediction.probability }}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-key">Threshold</span>
+                    <span class="detail-value">0.50</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-key">Model</span>
+                    <span class="detail-value">{{ model_name }}</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Image Display -->
+        <div class="glass-card image-card">
+            <div class="card-header">
+                <div class="card-icon">🖼️</div>
+                <h3>Uploaded Image</h3>
+            </div>
+            <div class="result-image-container">
+                <img src="data:image/png;base64,{{ image_b64 }}"
+                     alt="Uploaded medical image"
+                     class="result-image">
+            </div>
+        </div>
+
+        {% if gradcam_b64 %}
+        <!-- Grad-CAM Card -->
+        <div class="glass-card gradcam-card">
+            <div class="card-header">
+                <div class="card-icon">🔍</div>
+                <h3>Grad-CAM Visualization</h3>
+            </div>
+            <div class="result-image-container">
+                <img src="data:image/png;base64,{{ gradcam_b64 }}"
+                     alt="Grad-CAM heatmap overlay"
+                     class="result-image">
+            </div>
+            <p class="gradcam-info">
+                Red/warm regions indicate areas that strongly influenced the model's prediction.
+                Blue/cool regions had less influence.
+            </p>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="results-actions">
+        <a href="/" class="action-btn primary-btn">
+            <span>🔬</span> Analyze Another Image
+        </a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Animate confidence gauge on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        setTimeout(function() {
+            const gaugeFill = document.querySelector('.gauge-fill');
+            const confValue = document.querySelector('.confidence-value');
+
+            if (gaugeFill && confValue) {
+                const target = parseFloat(gaugeFill.dataset.target);
+                gaugeFill.style.width = target + '%';
+
+                // Animate number
+                let current = 0;
+                const step = target / 40;
+                const interval = setInterval(function() {
+                    current += step;
+                    if (current >= target) {
+                        current = target;
+                        clearInterval(interval);
+                    }
+                    confValue.textContent = current.toFixed(1) + '%';
+                }, 25);
+            }
+        }, 300);
+    });
+</script>
+{% endblock %}

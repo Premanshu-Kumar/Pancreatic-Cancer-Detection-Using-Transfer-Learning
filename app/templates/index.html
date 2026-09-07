@@ -1,0 +1,142 @@
+{% extends "base.html" %}
+
+{% block title %}Cancer Detection — Upload Image{% endblock %}
+
+{% block content %}
+<div class="hero-section">
+    <div class="hero-text">
+        <h2 class="hero-title">
+            AI-Powered <span class="gradient-text">Cancer Screening</span>
+        </h2>
+        <p class="hero-description">
+            Upload a medical CT scan image for instant analysis using state-of-the-art
+            transfer learning models. Get classification results with confidence scores
+            and Grad-CAM visual explanations.
+        </p>
+    </div>
+</div>
+
+<div class="upload-section">
+    <form id="prediction-form" action="/predict" method="post" enctype="multipart/form-data">
+        <!-- Upload Card -->
+        <div class="glass-card upload-card">
+            <div class="card-header">
+                <div class="card-icon">📤</div>
+                <h3>Upload Medical Image</h3>
+            </div>
+
+            <div class="drop-zone" id="drop-zone">
+                <div class="drop-zone-content" id="drop-zone-content">
+                    <div class="drop-icon">
+                        <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M32 44V20M32 20l-8 8M32 20l8 8" stroke="url(#uploadGrad)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M12 40v8a4 4 0 004 4h32a4 4 0 004-4v-8" stroke="url(#uploadGrad)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                            <defs>
+                                <linearGradient id="uploadGrad" x1="12" y1="20" x2="52" y2="52">
+                                    <stop offset="0%" stop-color="#6c5ce7"/>
+                                    <stop offset="100%" stop-color="#00cec9"/>
+                                </linearGradient>
+                            </defs>
+                        </svg>
+                    </div>
+                    <p class="drop-text">Drag & drop your image here</p>
+                    <p class="drop-subtext">or click to browse</p>
+                    <p class="drop-formats">Supports: JPG, PNG, BMP, TIFF</p>
+                </div>
+                <div class="image-preview" id="image-preview" style="display: none;">
+                    <img id="preview-img" src="" alt="Preview">
+                    <button type="button" class="remove-btn" id="remove-btn" title="Remove image">✕</button>
+                </div>
+                <input type="file" name="file" id="file-input" accept=".jpg,.jpeg,.png,.bmp,.tiff,.tif" required hidden>
+            </div>
+            <p class="file-name" id="file-name"></p>
+        </div>
+
+        <!-- Settings Card -->
+        <div class="glass-card settings-card">
+            <div class="card-header">
+                <div class="card-icon">⚙️</div>
+                <h3>Analysis Settings</h3>
+            </div>
+
+            <div class="settings-grid">
+                <!-- Model Selection -->
+                <div class="setting-group">
+                    <label class="setting-label">Select Model</label>
+                    <div class="model-selector">
+                        {% if has_models %}
+                            {% for model in available_models %}
+                            <label class="model-option {% if loop.first %}selected{% endif %}">
+                                <input type="radio" name="model_name" value="{{ model }}"
+                                       {% if loop.first %}checked{% endif %}>
+                                <div class="model-card">
+                                    <span class="model-badge model-{{ model }}">
+                                        {% if model == 'vgg16' %}VGG16
+                                        {% elif model == 'resnet50' %}ResNet50
+                                        {% elif model == 'inceptionv3' %}InceptionV3
+                                        {% endif %}
+                                    </span>
+                                    <span class="model-size">
+                                        {% if model == 'vgg16' %}224×224
+                                        {% elif model == 'resnet50' %}224×224
+                                        {% elif model == 'inceptionv3' %}299×299
+                                        {% endif %}
+                                    </span>
+                                </div>
+                            </label>
+                            {% endfor %}
+                        {% else %}
+                            <div class="no-models-notice">
+                                <p>⚠️ No trained models found.</p>
+                                <p class="notice-small">Train a model first using the notebooks or CLI.</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Grad-CAM Toggle -->
+                <div class="setting-group">
+                    <label class="setting-label">Explainability</label>
+                    <label class="toggle-switch">
+                        <input type="checkbox" name="generate_gradcam" value="true" id="gradcam-toggle">
+                        <span class="toggle-slider"></span>
+                        <span class="toggle-label">Generate Grad-CAM Heatmap</span>
+                    </label>
+                    <p class="setting-hint">Visualize which regions influenced the prediction</p>
+                </div>
+            </div>
+
+            <!-- Submit Button -->
+            <button type="submit" class="analyze-btn" id="analyze-btn" {% if not has_models %}disabled{% endif %}>
+                <span class="btn-text">Analyze Image</span>
+                <span class="btn-loader" id="btn-loader" style="display: none;">
+                    <span class="spinner"></span>
+                    Analyzing...
+                </span>
+            </button>
+        </div>
+    </form>
+</div>
+
+<!-- Features Section -->
+<section class="features-section" id="about">
+    <h3 class="section-title">How It Works</h3>
+    <div class="features-grid">
+        <div class="feature-card glass-card">
+            <div class="feature-icon">🔬</div>
+            <h4>Upload</h4>
+            <p>Upload a pancreatic CT scan image in JPG, PNG, or TIFF format.</p>
+        </div>
+        <div class="feature-card glass-card">
+            <div class="feature-icon">🧠</div>
+            <h4>AI Analysis</h4>
+            <p>Pre-trained deep learning models extract features and classify the image.</p>
+        </div>
+        <div class="feature-card glass-card">
+            <div class="feature-icon">📊</div>
+            <h4>Results</h4>
+            <p>Get instant classification with confidence scores and visual explanations.</p>
+        </div>
+    </div>
+</section>
+{% endblock %}

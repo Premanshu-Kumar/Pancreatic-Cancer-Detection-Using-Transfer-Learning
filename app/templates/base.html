@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Pancreatic Cancer Detection System using Transfer Learning — Classify medical images as Normal or Cancerous with AI-powered analysis.">
+    <title>{% block title %}Cancer Detection System{% endblock %}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/styles.css">
+    {% block head %}{% endblock %}
+</head>
+<body>
+    <!-- Animated background particles -->
+    <div class="bg-particles">
+        <div class="particle particle-1"></div>
+        <div class="particle particle-2"></div>
+        <div class="particle particle-3"></div>
+        <div class="particle particle-4"></div>
+        <div class="particle particle-5"></div>
+    </div>
+
+    <!-- Header -->
+    <header class="app-header">
+        <div class="header-content">
+            <div class="logo">
+                <div class="logo-icon">
+                    <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="20" cy="20" r="18" stroke="url(#logoGradient)" stroke-width="2.5" fill="none"/>
+                        <path d="M14 20h12M20 14v12" stroke="url(#logoGradient)" stroke-width="2.5" stroke-linecap="round"/>
+                        <defs>
+                            <linearGradient id="logoGradient" x1="0" y1="0" x2="40" y2="40">
+                                <stop offset="0%" stop-color="#6c5ce7"/>
+                                <stop offset="100%" stop-color="#00cec9"/>
+                            </linearGradient>
+                        </defs>
+                    </svg>
+                </div>
+                <div class="logo-text">
+                    <h1>Cancer Detection</h1>
+                    <span class="logo-subtitle">Transfer Learning System</span>
+                </div>
+            </div>
+            <nav class="nav-links">
+                <a href="/" class="nav-link active">Detect</a>
+                <a href="#about" class="nav-link">About</a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main content -->
+    <main class="main-content">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Disclaimer -->
+    <footer class="disclaimer-footer">
+        <div class="disclaimer-content">
+            <div class="disclaimer-icon">⚠️</div>
+            <p>
+                <strong>Medical Disclaimer:</strong> This system is a research/educational tool only.
+                Predictions should NOT be used as a substitute for professional medical diagnosis.
+                Always consult qualified healthcare professionals for medical decisions.
+            </p>
+        </div>
+    </footer>
+
+    <script src="/static/js/app.js"></script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>
