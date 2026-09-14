@@ -30,6 +30,7 @@ aiofiles>=23.1.0
 
 # Progress & Utilities
 tqdm>=4.65.0
+python-dotenv>=1.0.0
 
 # Testing
 pytest>=7.3.0

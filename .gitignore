@@ -13,9 +13,15 @@ htmlcov/
 
 # Environments
 .env
+*.env
 .venv
 env/
 venv/
+
+# Packaging & Builds
+build/
+dist/
+*.egg-info/
 
 # IDE & OS files
 .vscode/
