@@ -110,6 +110,17 @@ document.addEventListener('DOMContentLoaded', function () {
         fileName.textContent = '';
     }
 
+    // ─── Model Selection Option Highlighting ────────────────────────────
+    const modelOptions = document.querySelectorAll('.model-pill-option, .model-option');
+    modelOptions.forEach(option => {
+        option.addEventListener('click', function () {
+            modelOptions.forEach(opt => opt.classList.remove('selected'));
+            this.classList.add('selected');
+            const radio = this.querySelector('input[type="radio"]');
+            if (radio) radio.checked = true;
+        });
+    });
+
     // ─── Form Submission ────────────────────────────────────────────────
     if (form) {
         form.addEventListener('submit', function (e) {

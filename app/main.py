@@ -106,11 +106,22 @@ templates = Jinja2Templates(directory=str(APP_DIR / "templates"))
 # Routes
 # =============================================================================
 @app.get("/")
-async def index(request: Request):
-    """Render the main upload/prediction page."""
+async def landing(request: Request):
+    """Render the initial landing page with the fixed video hero section."""
+    return templates.TemplateResponse(
+        "landing.html",
+        {
+            "request": request,
+        },
+    )
+
+
+@app.get("/detect")
+async def detect(request: Request):
+    """Render the 2nd page: Cancer Detection workbench (White-Grey theme)."""
     available_models = list(_loaded_models.keys())
     return templates.TemplateResponse(
-        "index.html",
+        "detect.html",
         {
             "request": request,
             "available_models": available_models,

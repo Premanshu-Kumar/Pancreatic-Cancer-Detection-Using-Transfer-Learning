@@ -1,144 +1,189 @@
-{% extends "base.html" %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cancer Detection — Diagnostic Results</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/styles.css?v=20">
+</head>
+<body class="theme-white-grey">
+    <!-- Header (Light White-Grey Theme) -->
+    <header class="app-header header-light">
+        <div class="header-content">
+            <div class="logo">
+                <div class="logo-icon">
+                    <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="20" cy="20" r="18" stroke="url(#logoGradientLight)" stroke-width="2.5" fill="none"/>
+                        <path d="M14 20h12M20 14v12" stroke="url(#logoGradientLight)" stroke-width="2.5" stroke-linecap="round"/>
+                        <defs>
+                            <linearGradient id="logoGradientLight" x1="0" y1="0" x2="40" y2="40">
+                                <stop offset="0%" stop-color="#4f46e5"/>
+                                <stop offset="100%" stop-color="#0284c7"/>
+                            </linearGradient>
+                        </defs>
+                    </svg>
+                </div>
+                <div class="logo-text">
+                    <h1 class="logo-title-light">Cancer Detection</h1>
+                    <span class="logo-subtitle-light">Transfer Learning Diagnostic System</span>
+                </div>
+            </div>
+            <nav class="nav-links">
+                <a href="/" class="nav-link light-nav-link">← Home</a>
+                <a href="/detect" class="nav-link light-nav-link active">Detect</a>
+            </nav>
+        </div>
+    </header>
 
-{% block title %}Cancer Detection — Results{% endblock %}
+    <main class="detect-main-container">
+        <div class="results-container-light">
+            {% if error %}
+            <!-- Error State -->
+            <div class="light-card error-card-light">
+                <div class="error-icon-light">❌</div>
+                <h3>Analysis Error</h3>
+                <p>{{ error }}</p>
+                <a href="/detect" class="back-btn-light">← Return to Detection</a>
+            </div>
 
-{% block content %}
-<div class="results-container">
+            {% elif prediction %}
+            <!-- Results Header -->
+            <div class="results-header-light">
+                <a href="/detect" class="back-link-light">← New Scan Analysis</a>
+                <h2 class="results-title-light">Diagnostic Screening Report</h2>
+                <p class="results-subtitle-light">Model Backbone: <strong>{{ model_name }}</strong> · Analyzed File: <code>{{ filename }}</code></p>
+            </div>
 
-    {% if error %}
-    <!-- Error State -->
-    <div class="glass-card error-card">
-        <div class="error-icon">❌</div>
-        <h3>Analysis Error</h3>
-        <p>{{ error }}</p>
-        <a href="/" class="back-btn">← Try Again</a>
-    </div>
+            <div class="results-grid-light">
+                <!-- Prediction Summary Card -->
+                <div class="light-card prediction-card-light {{ 'cancerous-border' if prediction.class == 'Cancerous' else 'normal-border' }}">
+                    <div class="prediction-header-group">
+                        <div class="prediction-status-pill {{ 'status-cancerous' if prediction.class == 'Cancerous' else 'status-normal' }}">
+                            {{ '⚠️ Positive Indication' if prediction.class == 'Cancerous' else '✓ Negative / Normal' }}
+                        </div>
+                        <span class="prediction-tag">AI Classification</span>
+                    </div>
 
-    {% elif prediction %}
-    <!-- Results Header -->
-    <div class="results-header">
-        <a href="/" class="back-link">← New Analysis</a>
-        <h2 class="results-title">Analysis Complete</h2>
-        <p class="results-subtitle">Model: <strong>{{ model_name }}</strong> · File: {{ filename }}</p>
-    </div>
+                    <div class="prediction-main-value">
+                        <h3 class="prediction-class-text {{ prediction.class|lower }}">
+                            {{ prediction.class }}
+                        </h3>
+                    </div>
 
-    <div class="results-grid">
-        <!-- Prediction Card -->
-        <div class="glass-card prediction-card {{ 'cancerous' if prediction.class == 'Cancerous' else 'normal' }}">
-            <div class="prediction-badge">
-                {% if prediction.class == 'Normal' %}
-                    <div class="badge-icon normal-icon">✓</div>
-                {% else %}
-                    <div class="badge-icon cancerous-icon">!</div>
+                    <!-- Confidence Gauge -->
+                    <div class="confidence-box-light">
+                        <div class="confidence-label-row">
+                            <span class="confidence-label-text">Model Confidence</span>
+                            <span class="confidence-percentage" data-target="{{ prediction.confidence }}">0%</span>
+                        </div>
+                        <div class="gauge-track-light">
+                            <div class="gauge-fill-light {{ 'fill-cancerous' if prediction.class == 'Cancerous' else 'fill-normal' }}"
+                                 style="width: 0%"
+                                 data-target="{{ prediction.confidence }}">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Clinical Details Table -->
+                    <div class="details-table-light">
+                        <div class="detail-row-light">
+                            <span>Raw Softmax Probability</span>
+                            <strong>{{ prediction.probability }}</strong>
+                        </div>
+                        <div class="detail-row-light">
+                            <span>Classification Threshold</span>
+                            <strong>0.50</strong>
+                        </div>
+                        <div class="detail-row-light">
+                            <span>Evaluated Model</span>
+                            <strong>{{ model_name }}</strong>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Input CT Image Display -->
+                <div class="light-card image-card-light">
+                    <div class="card-header-light">
+                        <div class="card-icon-badge">🖼️</div>
+                        <div>
+                            <h3 class="card-title-light">Input CT Scan</h3>
+                            <p class="card-desc-light">Preprocessed normalized image</p>
+                        </div>
+                    </div>
+                    <div class="image-box-light">
+                        <img src="data:image/png;base64,{{ image_b64 }}"
+                             alt="Uploaded medical CT image"
+                             class="result-img-light">
+                    </div>
+                </div>
+
+                {% if gradcam_b64 %}
+                <!-- Grad-CAM Card -->
+                <div class="light-card gradcam-card-light">
+                    <div class="card-header-light">
+                        <div class="card-icon-badge">🔍</div>
+                        <div>
+                            <h3 class="card-title-light">Grad-CAM Activation Map</h3>
+                            <p class="card-desc-light">Localization heatmap overlay</p>
+                        </div>
+                    </div>
+                    <div class="image-box-light">
+                        <img src="data:image/png;base64,{{ gradcam_b64 }}"
+                             alt="Grad-CAM heatmap overlay"
+                             class="result-img-light">
+                    </div>
+                    <p class="gradcam-caption-light">
+                        Warm regions (red/yellow) indicate highest tensor gradient activations driving the diagnostic inference.
+                    </p>
+                </div>
                 {% endif %}
             </div>
 
-            <div class="prediction-result">
-                <span class="prediction-label">Classification</span>
-                <h3 class="prediction-class {{ prediction.class|lower }}">
-                    {{ prediction.class }}
-                </h3>
+            <!-- Action Buttons -->
+            <div class="results-actions-light">
+                <a href="/detect" class="action-btn-primary-light">
+                    <span>🔬</span> Analyze Another CT Scan
+                </a>
             </div>
-
-            <!-- Confidence Gauge -->
-            <div class="confidence-section">
-                <span class="confidence-label">Confidence</span>
-                <div class="confidence-gauge">
-                    <div class="gauge-track">
-                        <div class="gauge-fill {{ prediction.class|lower }}"
-                             style="width: 0%"
-                             data-target="{{ prediction.confidence }}">
-                        </div>
-                    </div>
-                    <span class="confidence-value" data-target="{{ prediction.confidence }}">0%</span>
-                </div>
-            </div>
-
-            <!-- Details -->
-            <div class="prediction-details">
-                <div class="detail-row">
-                    <span class="detail-key">Probability</span>
-                    <span class="detail-value">{{ prediction.probability }}</span>
-                </div>
-                <div class="detail-row">
-                    <span class="detail-key">Threshold</span>
-                    <span class="detail-value">0.50</span>
-                </div>
-                <div class="detail-row">
-                    <span class="detail-key">Model</span>
-                    <span class="detail-value">{{ model_name }}</span>
-                </div>
-            </div>
+            {% endif %}
         </div>
+    </main>
 
-        <!-- Image Display -->
-        <div class="glass-card image-card">
-            <div class="card-header">
-                <div class="card-icon">🖼️</div>
-                <h3>Uploaded Image</h3>
-            </div>
-            <div class="result-image-container">
-                <img src="data:image/png;base64,{{ image_b64 }}"
-                     alt="Uploaded medical image"
-                     class="result-image">
-            </div>
-        </div>
-
-        {% if gradcam_b64 %}
-        <!-- Grad-CAM Card -->
-        <div class="glass-card gradcam-card">
-            <div class="card-header">
-                <div class="card-icon">🔍</div>
-                <h3>Grad-CAM Visualization</h3>
-            </div>
-            <div class="result-image-container">
-                <img src="data:image/png;base64,{{ gradcam_b64 }}"
-                     alt="Grad-CAM heatmap overlay"
-                     class="result-image">
-            </div>
-            <p class="gradcam-info">
-                Red/warm regions indicate areas that strongly influenced the model's prediction.
-                Blue/cool regions had less influence.
+    <footer class="disclaimer-footer-light">
+        <div class="disclaimer-content-light">
+            <div class="disclaimer-icon-light">⚕️</div>
+            <p>
+                <strong>Clinical Disclaimer:</strong> AI classification is a diagnostic aid and does not constitute a final clinical diagnosis. Always consult certified medical practitioners.
             </p>
         </div>
-        {% endif %}
-    </div>
+    </footer>
 
-    <!-- Action Buttons -->
-    <div class="results-actions">
-        <a href="/" class="action-btn primary-btn">
-            <span>🔬</span> Analyze Another Image
-        </a>
-    </div>
-    {% endif %}
-</div>
-{% endblock %}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(function() {
+                const gaugeFill = document.querySelector('.gauge-fill-light');
+                const confValue = document.querySelector('.confidence-percentage');
 
-{% block scripts %}
-<script>
-    // Animate confidence gauge on page load
-    document.addEventListener('DOMContentLoaded', function() {
-        setTimeout(function() {
-            const gaugeFill = document.querySelector('.gauge-fill');
-            const confValue = document.querySelector('.confidence-value');
+                if (gaugeFill && confValue) {
+                    const target = parseFloat(gaugeFill.dataset.target);
+                    gaugeFill.style.width = target + '%';
 
-            if (gaugeFill && confValue) {
-                const target = parseFloat(gaugeFill.dataset.target);
-                gaugeFill.style.width = target + '%';
-
-                // Animate number
-                let current = 0;
-                const step = target / 40;
-                const interval = setInterval(function() {
-                    current += step;
-                    if (current >= target) {
-                        current = target;
-                        clearInterval(interval);
-                    }
-                    confValue.textContent = current.toFixed(1) + '%';
-                }, 25);
-            }
-        }, 300);
-    });
-</script>
-{% endblock %}
+                    let current = 0;
+                    const step = target / 40;
+                    const interval = setInterval(function() {
+                        current += step;
+                        if (current >= target) {
+                            current = target;
+                            clearInterval(interval);
+                        }
+                        confValue.textContent = current.toFixed(1) + '%';
+                    }, 25);
+                }
+            }, 250);
+        });
+    </script>
+</body>
+</html>

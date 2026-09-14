@@ -8,17 +8,24 @@ Modify this file to customize the training pipeline.
 import os
 from pathlib import Path
 
+# Load environment variables from .env file if available
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    pass
+
 # =============================================================================
 # Project Paths
 # =============================================================================
-BASE_DIR = Path(__file__).resolve().parent
-DATA_DIR = BASE_DIR / "data"
-RAW_DATA_DIR = DATA_DIR / "raw"
-PROCESSED_DATA_DIR = DATA_DIR / "processed"
-SAMPLE_DATA_DIR = DATA_DIR / "sample"
-MODELS_DIR = BASE_DIR / "models"
-RESULTS_DIR = BASE_DIR / "results"
-NOTEBOOKS_DIR = BASE_DIR / "notebooks"
+BASE_DIR = Path(os.getenv("BASE_DIR", str(Path(__file__).resolve().parent)))
+DATA_DIR = Path(os.getenv("DATA_DIR", str(BASE_DIR / "data")))
+RAW_DATA_DIR = Path(os.getenv("RAW_DATA_DIR", str(DATA_DIR / "raw")))
+PROCESSED_DATA_DIR = Path(os.getenv("PROCESSED_DATA_DIR", str(DATA_DIR / "processed")))
+SAMPLE_DATA_DIR = Path(os.getenv("SAMPLE_DATA_DIR", str(DATA_DIR / "sample")))
+MODELS_DIR = Path(os.getenv("MODELS_DIR", str(BASE_DIR / "models")))
+RESULTS_DIR = Path(os.getenv("RESULTS_DIR", str(BASE_DIR / "results")))
+NOTEBOOKS_DIR = Path(os.getenv("NOTEBOOKS_DIR", str(BASE_DIR / "notebooks")))
 
 # Training / Validation / Test subdirectories
 TRAIN_DIR = PROCESSED_DATA_DIR / "train"
@@ -54,9 +61,9 @@ IMAGE_CONFIGS = {
 }
 
 # Default image configuration
-DEFAULT_MODEL = "resnet50"
-DEFAULT_IMG_SIZE = IMAGE_CONFIGS[DEFAULT_MODEL]["img_size"]
-DEFAULT_INPUT_SHAPE = IMAGE_CONFIGS[DEFAULT_MODEL]["input_shape"]
+DEFAULT_MODEL = os.getenv("DEFAULT_MODEL", "resnet50")
+DEFAULT_IMG_SIZE = IMAGE_CONFIGS.get(DEFAULT_MODEL, IMAGE_CONFIGS["resnet50"])["img_size"]
+DEFAULT_INPUT_SHAPE = IMAGE_CONFIGS.get(DEFAULT_MODEL, IMAGE_CONFIGS["resnet50"])["input_shape"]
 
 # =============================================================================
 # Training Hyperparameters

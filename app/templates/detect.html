@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Pancreatic Cancer Detection System using Transfer Learning — Classify medical images as Normal or Cancerous with AI-powered analysis.">
+    <title>Cancer Detection — AI Diagnostic Workbench</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/styles.css?v=20">
+</head>
+<body class="theme-white-grey">
+    <!-- Header (Light White-Grey Theme) -->
+    <header class="app-header header-light">
+        <div class="header-content">
+            <div class="logo">
+                <div class="logo-icon">
+                    <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="20" cy="20" r="18" stroke="url(#logoGradientLight)" stroke-width="2.5" fill="none"/>
+                        <path d="M14 20h12M20 14v12" stroke="url(#logoGradientLight)" stroke-width="2.5" stroke-linecap="round"/>
+                        <defs>
+                            <linearGradient id="logoGradientLight" x1="0" y1="0" x2="40" y2="40">
+                                <stop offset="0%" stop-color="#4f46e5"/>
+                                <stop offset="100%" stop-color="#0284c7"/>
+                            </linearGradient>
+                        </defs>
+                    </svg>
+                </div>
+                <div class="logo-text">
+                    <h1 class="logo-title-light">Cancer Detection</h1>
+                    <span class="logo-subtitle-light">Transfer Learning Diagnostic System</span>
+                </div>
+            </div>
+            <nav class="nav-links">
+                <a href="/" class="nav-link light-nav-link">← Home</a>
+                <a href="/detect" class="nav-link light-nav-link active">Detect</a>
+                <a href="#about" class="nav-link light-nav-link">About</a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="detect-main-container">
+        <!-- Workbench Hero Banner -->
+        <section class="detect-hero-banner">
+            <div class="detect-badge">
+                <span class="pulse-dot"></span> Clinical AI Screening & Pathology
+            </div>
+            <h2 class="detect-title">
+                Pancreatic Cancer <span class="gradient-text-light">Diagnostic Analysis</span>
+            </h2>
+            <p class="detect-subtitle">
+                Upload a CT scan cross-section for deep transfer learning feature extraction, classification, and Grad-CAM interpretability.
+            </p>
+        </section>
+
+        <!-- Clinical Symptom Alert: Jaundice Indicator (Yellowing of skin & whites of eyes) -->
+        <div class="jaundice-alert-card">
+            <div class="jaundice-icon-box">
+                <span>👁️</span>
+            </div>
+            <div class="jaundice-content">
+                <div class="jaundice-header-row">
+                    <span class="jaundice-pill">Hallmark Clinical Symptom · Jaundice</span>
+                    <span class="jaundice-code">Pancreatic Duct Obstruction</span>
+                </div>
+                <h3 class="jaundice-title">Yellowing of the Skin & Whites of the Eyes (Scleral Icterus)</h3>
+                <p class="jaundice-desc">
+                    A key clinical indicator occurs when head-of-pancreas tumors compress the common bile duct, causing bilirubin accumulation that leads to painless jaundice, yellowing of the sclera (eyes) and cutaneous skin, alongside abdominal CT morphological changes.
+                </p>
+                <div class="symptom-tags">
+                    <span class="symptom-tag">🟡 Yellow Eyes (Scleral Icterus)</span>
+                    <span class="symptom-tag">🟡 Yellowing of Skin</span>
+                    <span class="symptom-tag">🟣 Pancreatic Head Compression</span>
+                    <span class="symptom-tag">🔬 AI CT Scan Screening</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Upload & Settings Grid -->
+        <section class="detect-workspace-section">
+            <form id="prediction-form" action="/predict" method="post" enctype="multipart/form-data">
+                <div class="workspace-grid">
+                    <!-- Upload Card -->
+                    <div class="light-card upload-card-light">
+                        <div class="card-header-light">
+                            <div class="card-icon-badge">📤</div>
+                            <div>
+                                <h3 class="card-title-light">Upload Medical CT Scan</h3>
+                                <p class="card-desc-light">Select or drop abdominal CT slice</p>
+                            </div>
+                        </div>
+
+                        <div class="drop-zone light-drop-zone" id="drop-zone">
+                            <div class="drop-zone-content" id="drop-zone-content">
+                                <div class="drop-icon-light">
+                                    <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <rect width="64" height="64" rx="16" fill="#eef2ff"/>
+                                        <path d="M32 40V22M32 22l-7 7M32 22l7 7" stroke="#4f46e5" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                        <path d="M18 38v4a4 4 0 004 4h20a4 4 0 004-4v-4" stroke="#4f46e5" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                    </svg>
+                                </div>
+                                <p class="drop-text-light">Drag & drop your CT image here</p>
+                                <p class="drop-subtext-light">or click to browse from computer</p>
+                                <div class="format-pills">
+                                    <span class="format-pill">PNG</span>
+                                    <span class="format-pill">JPG</span>
+                                    <span class="format-pill">BMP</span>
+                                    <span class="format-pill">TIFF</span>
+                                </div>
+                            </div>
+                            <div class="image-preview" id="image-preview" style="display: none;">
+                                <img id="preview-img" src="" alt="Preview">
+                                <button type="button" class="remove-btn" id="remove-btn" title="Remove image">✕</button>
+                            </div>
+                            <input type="file" name="file" id="file-input" accept=".jpg,.jpeg,.png,.bmp,.tiff,.tif" required hidden>
+                        </div>
+                        <p class="file-name" id="file-name"></p>
+                    </div>
+
+                    <!-- Settings Card -->
+                    <div class="light-card settings-card-light">
+                        <div class="card-header-light">
+                            <div class="card-icon-badge">⚙️</div>
+                            <div>
+                                <h3 class="card-title-light">Model & Inference Configuration</h3>
+                                <p class="card-desc-light">Choose vision backbone and explainability</p>
+                            </div>
+                        </div>
+
+                        <div class="settings-body-light">
+                            <!-- Model Selection -->
+                            <div class="setting-group-light">
+                                <label class="setting-label-light">Deep Learning Model</label>
+                                <div class="model-selector-light">
+                                    {% if has_models %}
+                                        {% for model in available_models %}
+                                        <label class="model-pill-option {% if loop.first %}selected{% endif %}">
+                                            <input type="radio" name="model_name" value="{{ model }}"
+                                                   {% if loop.first %}checked{% endif %}>
+                                            <div class="model-pill-card">
+                                                <div class="model-pill-info">
+                                                    <span class="model-name-text">
+                                                        {% if model == 'vgg16' %}VGG-16
+                                                        {% elif model == 'resnet50' %}ResNet-50
+                                                        {% elif model == 'inceptionv3' %}Inception-V3
+                                                        {% else %}{{ model|upper }}
+                                                        {% endif %}
+                                                    </span>
+                                                    <span class="model-meta-text">
+                                                        {% if model == 'vgg16' %}224×224 · 138M params
+                                                        {% elif model == 'resnet50' %}224×224 · Transfer Weights
+                                                        {% elif model == 'inceptionv3' %}299×299 · Inception Blocks
+                                                        {% else %}Pretrained
+                                                        {% endif %}
+                                                    </span>
+                                                </div>
+                                                <span class="model-status-indicator">Active</span>
+                                            </div>
+                                        </label>
+                                        {% endfor %}
+                                    {% else %}
+                                        <div class="no-models-box-light">
+                                            <p>⚠️ No active models loaded.</p>
+                                            <p class="notice-small-light">Check backend weights configuration.</p>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <!-- Grad-CAM Toggle -->
+                            <div class="setting-group-light">
+                                <div class="toggle-card-light">
+                                    <div class="toggle-text-group">
+                                        <label class="toggle-main-label" for="gradcam-toggle">Grad-CAM Heatmap</label>
+                                        <span class="toggle-sub-label">Generate visual activation map of tumor regions</span>
+                                    </div>
+                                    <label class="toggle-switch-light">
+                                        <input type="checkbox" name="generate_gradcam" value="true" id="gradcam-toggle">
+                                        <span class="toggle-slider-light"></span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- Submit Button -->
+                            <button type="submit" class="analyze-btn-light" id="analyze-btn" {% if not has_models %}disabled{% endif %}>
+                                <span class="btn-text">Run Diagnostic Screening</span>
+                                <span class="btn-loader" id="btn-loader" style="display: none;">
+                                    <span class="spinner-light"></span>
+                                    Analyzing Scan...
+                                </span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </section>
+
+        <!-- Features Section -->
+        <section class="detect-features-section" id="about">
+            <h3 class="section-title-light">System Architecture & Pipeline</h3>
+            <div class="features-grid-light">
+                <div class="light-card feature-card-light">
+                    <div class="feature-icon-light">📥</div>
+                    <h4>1. DICOM / CT Normalization</h4>
+                    <p>Standardizes contrast, applies Hounsfield windowing, and resizes slices to backbone tensor input dimensions.</p>
+                </div>
+                <div class="light-card feature-card-light">
+                    <div class="feature-icon-light">🧠</div>
+                    <h4>2. Transfer Learning</h4>
+                    <p>Deep residual feature hierarchies trained on abdominal scans extract subtle pancreatic tissue irregularities.</p>
+                </div>
+                <div class="light-card feature-card-light">
+                    <div class="feature-icon-light">📊</div>
+                    <h4>3. Explainable Diagnosis</h4>
+                    <p>Computes class-activation gradients (Grad-CAM) to localize the morphological features driving classification.</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Medical Disclaimer Footer -->
+    <footer class="disclaimer-footer-light">
+        <div class="disclaimer-content-light">
+            <div class="disclaimer-icon-light">⚕️</div>
+            <p>
+                <strong>Clinical Disclaimer:</strong> This deep learning system is built for research, clinical decision support, and academic validation. Output classifications should be evaluated alongside professional radiology interpretation.
+            </p>
+        </div>
+    </footer>
+
+    <script src="/static/js/app.js"></script>
+</body>
+</html>

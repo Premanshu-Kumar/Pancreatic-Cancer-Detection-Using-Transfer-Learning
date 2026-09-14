@@ -3,20 +3,38 @@
 {% block title %}Cancer Detection — Upload Image{% endblock %}
 
 {% block content %}
-<div class="hero-section">
-    <div class="hero-text">
-        <h2 class="hero-title">
-            AI-Powered <span class="gradient-text">Cancer Screening</span>
+<!-- Full Viewport Landing Hero Section (100vh over fixed video) -->
+<section class="video-hero-viewport">
+    <div class="hero-content-block">
+        <h2 class="hero-staggered-heading">
+            <span class="fade-up-word" style="--word-delay: 0.15s;">WE</span>
+            <span class="fade-up-word" style="--word-delay: 0.23s;">BUILD</span>
+            <span class="fade-up-word" style="--word-delay: 0.31s;">END-TO-END</span>
+            <span class="fade-up-word" style="--word-delay: 0.39s;">AI</span>
+            <span class="fade-up-word" style="--word-delay: 0.47s;">AUTOMATION</span>
+            <span class="fade-up-word" style="--word-delay: 0.55s;">SYSTEMS.</span>
         </h2>
-        <p class="hero-description">
-            Upload a medical CT scan image for instant analysis using state-of-the-art
-            transfer learning models. Get classification results with confidence scores
-            and Grad-CAM visual explanations.
+        <p class="hero-subtext-animated" style="--subtext-delay: 0.9s;">
+            We provide all-in-one AI automation services in one place.
         </p>
+        <div class="hero-cta-wrapper" style="--cta-delay: 1.05s;">
+            <a href="#workspace" class="hero-cta-btn">
+                <span>Launch Diagnostic Workbench</span>
+                <svg viewBox="0 0 20 20" fill="currentColor" class="cta-icon">
+                    <path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd" />
+                </svg>
+            </a>
+        </div>
     </div>
-</div>
+    <a href="#workspace" class="scroll-indicator" aria-label="Scroll down">
+        <span class="mouse-scroll">
+            <span class="mouse-wheel"></span>
+        </span>
+    </a>
+</section>
 
-<div class="upload-section">
+<!-- Diagnostic Workbench / Upload Section -->
+<div class="upload-section" id="workspace">
     <form id="prediction-form" action="/predict" method="post" enctype="multipart/form-data">
         <!-- Upload Card -->
         <div class="glass-card upload-card">
