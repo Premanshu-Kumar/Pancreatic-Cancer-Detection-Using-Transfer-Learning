@@ -68,36 +68,36 @@ DEFAULT_INPUT_SHAPE = IMAGE_CONFIGS.get(DEFAULT_MODEL, IMAGE_CONFIGS["resnet50"]
 # =============================================================================
 # Training Hyperparameters
 # =============================================================================
-BATCH_SIZE = 32
-EPOCHS_PHASE1 = 15          # Feature extraction (frozen base)
-EPOCHS_PHASE2 = 20          # Fine-tuning (unfrozen top layers)
-LEARNING_RATE_PHASE1 = 1e-4
-LEARNING_RATE_PHASE2 = 1e-5
+BATCH_SIZE = int(os.getenv("BATCH_SIZE", "32"))
+EPOCHS_PHASE1 = int(os.getenv("EPOCHS_PHASE1", "15"))          # Feature extraction (frozen base)
+EPOCHS_PHASE2 = int(os.getenv("EPOCHS_PHASE2", "20"))          # Fine-tuning (unfrozen top layers)
+LEARNING_RATE_PHASE1 = float(os.getenv("LEARNING_RATE_PHASE1", "1e-4"))
+LEARNING_RATE_PHASE2 = float(os.getenv("LEARNING_RATE_PHASE2", "1e-5"))
 
 # Optimizer
-OPTIMIZER = "adam"
+OPTIMIZER = os.getenv("OPTIMIZER", "adam")
 
 # Loss function
-LOSS_FUNCTION = "binary_crossentropy"
+LOSS_FUNCTION = os.getenv("LOSS_FUNCTION", "binary_crossentropy")
 
 # =============================================================================
 # Data Split Ratios
 # =============================================================================
-TRAIN_SPLIT = 0.70
-VAL_SPLIT = 0.15
-TEST_SPLIT = 0.15
+TRAIN_SPLIT = float(os.getenv("TRAIN_SPLIT", "0.70"))
+VAL_SPLIT = float(os.getenv("VAL_SPLIT", "0.15"))
+TEST_SPLIT = float(os.getenv("TEST_SPLIT", "0.15"))
 
 # =============================================================================
 # Data Augmentation Parameters
 # =============================================================================
 AUGMENTATION_CONFIG = {
-    "rotation_range": 20,
-    "width_shift_range": 0.1,
-    "height_shift_range": 0.1,
-    "shear_range": 0.1,
-    "zoom_range": 0.2,
-    "horizontal_flip": True,
-    "vertical_flip": False,
+    "rotation_range": int(os.getenv("AUG_ROTATION_RANGE", "20")),
+    "width_shift_range": float(os.getenv("AUG_WIDTH_SHIFT", "0.1")),
+    "height_shift_range": float(os.getenv("AUG_HEIGHT_SHIFT", "0.1")),
+    "shear_range": float(os.getenv("AUG_SHEAR_RANGE", "0.1")),
+    "zoom_range": float(os.getenv("AUG_ZOOM_RANGE", "0.2")),
+    "horizontal_flip": os.getenv("AUG_HORIZONTAL_FLIP", "true").lower() == "true",
+    "vertical_flip": os.getenv("AUG_VERTICAL_FLIP", "false").lower() == "true",
     "brightness_range": [0.8, 1.2],
     "fill_mode": "nearest",
 }
@@ -105,10 +105,10 @@ AUGMENTATION_CONFIG = {
 # =============================================================================
 # Callbacks Configuration
 # =============================================================================
-EARLY_STOPPING_PATIENCE = 7
-REDUCE_LR_PATIENCE = 3
-REDUCE_LR_FACTOR = 0.2
-MIN_LEARNING_RATE = 1e-7
+EARLY_STOPPING_PATIENCE = int(os.getenv("EARLY_STOPPING_PATIENCE", "7"))
+REDUCE_LR_PATIENCE = int(os.getenv("REDUCE_LR_PATIENCE", "3"))
+REDUCE_LR_FACTOR = float(os.getenv("REDUCE_LR_FACTOR", "0.2"))
+MIN_LEARNING_RATE = float(os.getenv("MIN_LEARNING_RATE", "1e-7"))
 
 # =============================================================================
 # Model Fine-Tuning Layers
@@ -122,16 +122,16 @@ FINE_TUNE_LAYERS = {
 # =============================================================================
 # Web Application
 # =============================================================================
-APP_HOST = "0.0.0.0"
-APP_PORT = 8000
-MAX_UPLOAD_SIZE_MB = 10
+APP_HOST = os.getenv("APP_HOST", os.getenv("HOST", "0.0.0.0"))
+APP_PORT = int(os.getenv("APP_PORT", os.getenv("PORT", "8000")))
+MAX_UPLOAD_SIZE_MB = int(os.getenv("MAX_UPLOAD_SIZE_MB", "10"))
 ALLOWED_EXTENSIONS = {".jpg", ".jpeg", ".png", ".bmp", ".tiff", ".tif"}
 
 # =============================================================================
 # Miscellaneous
 # =============================================================================
-RANDOM_SEED = 42
-VERBOSE = 1
+RANDOM_SEED = int(os.getenv("RANDOM_SEED", "42"))
+VERBOSE = int(os.getenv("VERBOSE", "1"))
 
 # =============================================================================
 # Ensure directories exist
