@@ -2,34 +2,72 @@
 Dataset Download & Setup Script
 =================================
 Downloads a pancreatic cancer CT scan dataset from Kaggle
-and organizes it into train/val/test splits.
+or generates a synthetic demo dataset and organizes it into train/val/test splits.
 """
 
 import os
 import sys
 import shutil
 import random
+import argparse
 from pathlib import Path
 
 # Add project root to path
-sys.path.insert(0, str(Path(__file__).resolve().parent))
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 import config
 
 
-def download_dataset():
-    """Download pancreatic CT dataset from Kaggle using kagglehub."""
-    import kagglehub
+def parse_args():
+    parser = argparse.ArgumentParser(
+        description="Download and organize Pancreatic Cancer CT datasets"
+    )
+    parser.add_argument(
+        "--synthetic",
+        action="store_true",
+        help="Force generation of synthetic CT demo dataset",
+    )
+    parser.add_argument(
+        "--samples-per-class",
+        type=int,
+        default=200,
+        help="Number of samples per class for synthetic generation",
+    )
+    parser.add_argument(
+        "--dataset-slug",
+        type=str,
+        default=None,
+        help="Specific Kaggle dataset slug to download",
+    )
+    return parser.parse_args()
+
+
+def download_dataset(dataset_slug_arg=None, force_synthetic=False, samples_per_class=200):
+    """Download pancreatic CT dataset from Kaggle using kagglehub or generate synthetic."""
+    if force_synthetic:
+        generate_synthetic_dataset(n_per_class=samples_per_class)
+        return
+
+    try:
+        import kagglehub
+    except ImportError:
+        print("kagglehub is not installed. Generating synthetic demo dataset...")
+        generate_synthetic_dataset(n_per_class=samples_per_class)
+        return
 
     print("=" * 60)
     print("  Downloading Pancreatic CT Dataset from Kaggle...")
     print("=" * 60)
 
-    # Try multiple dataset sources
-    datasets_to_try = [
-        "tahsinmostafiz/pancreas-ct-dataset",
-        "salihayesilyurt/pancreatic-ct-images",
-        "andrewmvd/medical-mnist",
-    ]
+    # Try dataset sources
+    datasets_to_try = (
+        [dataset_slug_arg]
+        if dataset_slug_arg
+        else [
+            "tahsinmostafiz/pancreas-ct-dataset",
+            "salihayesilyurt/pancreatic-ct-images",
+            "andrewmvd/medical-mnist",
+        ]
+    )
 
     download_path = None
     dataset_used = None
@@ -48,7 +86,7 @@ def download_dataset():
     if download_path is None:
         print("\n  ⚠ Could not download from Kaggle.")
         print("  Generating synthetic demo dataset instead...")
-        generate_synthetic_dataset()
+        generate_synthetic_dataset(n_per_class=samples_per_class)
         return
 
     # Explore what was downloaded
@@ -59,7 +97,7 @@ def download_dataset():
         prefix = "📁" if item.is_dir() else "📄"
         print(f"    {prefix} {rel}")
 
-    # Organize into our project structure
+    # Organize into project structure
     organize_dataset(downloaded, dataset_used)
 
 
@@ -70,7 +108,6 @@ def organize_dataset(source_path: Path, dataset_slug: str):
     """
     print(f"\n  Organizing dataset into project structure...")
 
-    # Find all image files
     image_extensions = {".png", ".jpg", ".jpeg", ".bmp", ".tiff", ".tif"}
     all_images = [
         f for f in source_path.rglob("*")
@@ -83,8 +120,6 @@ def organize_dataset(source_path: Path, dataset_slug: str):
         generate_synthetic_dataset()
         return
 
-    # Try to detect class structure
-    # Look for folders named like: normal, tumor, cancer, benign, malignant, etc.
     normal_keywords = {"normal", "healthy", "benign", "negative", "0", "non"}
     cancer_keywords = {"cancer", "tumor", "malignant", "positive", "1", "cancerous", "abnormal"}
 
@@ -93,9 +128,7 @@ def organize_dataset(source_path: Path, dataset_slug: str):
     unclassified = []
 
     for img in all_images:
-        path_lower = str(img).lower()
         parent_name = img.parent.name.lower()
-
         if any(kw in parent_name for kw in cancer_keywords):
             cancer_images.append(img)
         elif any(kw in parent_name for kw in normal_keywords):
@@ -105,7 +138,6 @@ def organize_dataset(source_path: Path, dataset_slug: str):
 
     print(f"  Classified: Normal={len(normal_images)}, Cancerous={len(cancer_images)}, Unclassified={len(unclassified)}")
 
-    # If no clear class structure, split unclassified 50/50 for demo
     if len(normal_images) == 0 and len(cancer_images) == 0 and len(unclassified) > 0:
         print("  No class folders detected. Splitting images 50/50 for demonstration...")
         random.seed(config.RANDOM_SEED)
@@ -114,10 +146,8 @@ def organize_dataset(source_path: Path, dataset_slug: str):
         normal_images = unclassified[:mid]
         cancer_images = unclassified[mid:]
     elif len(normal_images) == 0 and len(cancer_images) > 0:
-        # Only cancer images found, use unclassified as normal
         normal_images = unclassified
     elif len(cancer_images) == 0 and len(normal_images) > 0:
-        # Only normal images found, use unclassified as cancer
         cancer_images = unclassified
 
     if len(normal_images) == 0 or len(cancer_images) == 0:
@@ -125,7 +155,6 @@ def organize_dataset(source_path: Path, dataset_slug: str):
         generate_synthetic_dataset()
         return
 
-    # Limit to reasonable size for CPU training
     max_per_class = 500
     if len(normal_images) > max_per_class:
         random.seed(config.RANDOM_SEED)
@@ -136,7 +165,6 @@ def organize_dataset(source_path: Path, dataset_slug: str):
 
     print(f"  Using: Normal={len(normal_images)}, Cancerous={len(cancer_images)}")
 
-    # Split into train/val/test
     _split_and_copy(normal_images, "Normal")
     _split_and_copy(cancer_images, "Cancerous")
 
@@ -171,14 +199,14 @@ def _split_and_copy(images: list, class_name: str):
         print(f"    {split_name}/{class_name}: {len(split_images)} images")
 
 
-def generate_synthetic_dataset():
+def generate_synthetic_dataset(n_per_class: int = 200):
     """
     Generate a synthetic demo dataset for testing the pipeline.
     Creates realistic-looking grayscale CT-like images with
     distinguishable patterns for Normal vs Cancerous.
     """
     import numpy as np
-    from PIL import Image, ImageDraw, ImageFilter
+    from PIL import Image
 
     print("\n" + "=" * 60)
     print("  Generating Synthetic Demo Dataset")
@@ -188,38 +216,26 @@ def generate_synthetic_dataset():
     random.seed(config.RANDOM_SEED)
     np.random.seed(config.RANDOM_SEED)
 
-    n_per_class = 200  # 200 Normal + 200 Cancerous
     img_size = 224
 
     def create_normal_image():
-        """Create a synthetic 'normal' CT-like image."""
-        # Dark background with smooth tissue-like texture
         base = np.random.normal(80, 15, (img_size, img_size)).clip(0, 255)
-
-        # Add smooth organ-like region in center
         y, x = np.ogrid[-img_size//2:img_size//2, -img_size//2:img_size//2]
         r = np.sqrt(x*x + y*y)
         organ_mask = (r < img_size * 0.3).astype(float)
 
-        # Smooth the mask
         from scipy.ndimage import gaussian_filter
         organ_mask = gaussian_filter(organ_mask, sigma=10)
 
-        # Slightly brighter organ region
         organ_intensity = np.random.normal(120, 10)
         base = base * (1 - organ_mask) + organ_intensity * organ_mask
 
-        # Add subtle noise
         noise = np.random.normal(0, 5, base.shape)
         base = (base + noise).clip(0, 255).astype(np.uint8)
 
-        # Convert to RGB (grayscale-like)
-        img = np.stack([base, base, base], axis=-1)
-        return img
+        return np.stack([base, base, base], axis=-1)
 
     def create_cancerous_image():
-        """Create a synthetic 'cancerous' CT-like image with visible lesion."""
-        # Start with normal-looking base
         base = np.random.normal(80, 15, (img_size, img_size)).clip(0, 255)
 
         y, x = np.ogrid[-img_size//2:img_size//2, -img_size//2:img_size//2]
@@ -231,7 +247,6 @@ def generate_synthetic_dataset():
         organ_intensity = np.random.normal(120, 10)
         base = base * (1 - organ_mask) + organ_intensity * organ_mask
 
-        # Add a bright irregular "tumor" region
         tumor_x = img_size // 2 + np.random.randint(-30, 30)
         tumor_y = img_size // 2 + np.random.randint(-30, 30)
         tumor_r = np.random.randint(15, 35)
@@ -239,24 +254,19 @@ def generate_synthetic_dataset():
         ty, tx = np.ogrid[:img_size, :img_size]
         tumor_dist = np.sqrt((tx - tumor_x)**2 + (ty - tumor_y)**2)
 
-        # Irregular tumor shape
         angles = np.arctan2(ty - tumor_y, tx - tumor_x)
         irregularity = tumor_r + 5 * np.sin(3 * angles) + 3 * np.cos(5 * angles)
         tumor_mask = (tumor_dist < irregularity).astype(float)
         tumor_mask = gaussian_filter(tumor_mask, sigma=3)
 
-        # Tumor is brighter with heterogeneous texture
         tumor_intensity = np.random.normal(180, 20, base.shape)
         base = base * (1 - tumor_mask) + tumor_intensity * tumor_mask
 
-        # Add noise
         noise = np.random.normal(0, 8, base.shape)
         base = (base + noise).clip(0, 255).astype(np.uint8)
 
-        img = np.stack([base, base, base], axis=-1)
-        return img
+        return np.stack([base, base, base], axis=-1)
 
-    # Check if scipy is available
     try:
         from scipy.ndimage import gaussian_filter
     except ImportError:
@@ -273,11 +283,10 @@ def generate_synthetic_dataset():
         all_images = []
         print(f"\n  Generating {n_per_class} {class_name} images...")
 
-        for i in range(n_per_class):
+        for _ in range(n_per_class):
             img_array = generator_fn()
             all_images.append(img_array)
 
-        # Split
         random.shuffle(all_images)
         n = len(all_images)
         n_train = int(n * config.TRAIN_SPLIT)
@@ -326,4 +335,9 @@ def _print_dataset_summary():
 
 if __name__ == "__main__":
     config.setup_directories()
-    download_dataset()
+    args = parse_args()
+    download_dataset(
+        dataset_slug_arg=args.dataset_slug,
+        force_synthetic=args.synthetic,
+        samples_per_class=args.samples_per_class,
+    )
