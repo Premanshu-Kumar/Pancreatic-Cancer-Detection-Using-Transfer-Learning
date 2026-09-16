@@ -16,8 +16,6 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from fastapi.middleware.cors import CORSMiddleware
 
-import sys
-sys.path.append(str(Path(__file__).resolve().parent.parent))
 import config
 from src.models.model_factory import ModelFactory
 

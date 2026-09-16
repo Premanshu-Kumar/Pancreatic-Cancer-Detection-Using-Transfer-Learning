@@ -1,0 +1,74 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pancreatic-cancer-detection"
+version = "1.0.0"
+description = "Deep learning and transfer learning clinical system for automated pancreatic cancer detection and Grad-CAM interpretability."
+readme = "README.md"
+license = { text = "MIT" }
+authors = [
+    { name = "Premanshu Kumar", email = "premanshu@example.com" }
+]
+requires-python = ">=3.9"
+keywords = [
+    "deep-learning",
+    "transfer-learning",
+    "pancreatic-cancer",
+    "medical-imaging",
+    "fastapi",
+    "tensorflow",
+    "gradcam"
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Healthcare Industry",
+    "Intended Audience :: Science/Research",
+    "Topic :: Scientific/Engineering :: Medical Science Apps.",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "License :: OSI Approved :: MIT License",
+]
+dependencies = [
+    "tensorflow>=2.12.0",
+    "keras>=2.12.0",
+    "numpy>=1.23.0",
+    "pandas>=1.5.0",
+    "opencv-python>=4.7.0",
+    "Pillow>=9.4.0",
+    "matplotlib>=3.7.0",
+    "seaborn>=0.12.0",
+    "scikit-learn>=1.2.0",
+    "fastapi>=0.100.0",
+    "uvicorn[standard]>=0.22.0",
+    "python-multipart>=0.0.6",
+    "jinja2>=3.1.0",
+    "aiofiles>=23.1.0",
+    "tqdm>=4.65.0",
+    "python-dotenv>=1.0.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.3.0",
+    "httpx>=0.24.0",
+]
+
+[project.scripts]
+pancreatic-app = "app.main:app"
+pancreatic-train = "scripts.train_quick:main"
+pancreatic-eval = "scripts.evaluate_model:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["src*", "app*", "scripts*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_functions = ["test_*"]
+addopts = "-v --tb=short"
