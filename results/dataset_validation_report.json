@@ -1,0 +1,376 @@
+{
+  "scanned_directory": "D:\\Projects\\Project Dox\\data",
+  "total_files": 2120,
+  "valid_files": 2118,
+  "corrupted_files": 0,
+  "blank_files": 2,
+  "duplicate_count": 70,
+  "class_distribution": {
+    "Cancerous": 1060,
+    "Normal": 1060
+  },
+  "issues": [
+    {
+      "type": "blank_slice",
+      "file": "D:\\Projects\\Project Dox\\data\\processed\\train\\Cancerous\\cancerous_train_0124.jpeg",
+      "mean": 25.0,
+      "std": 0.09
+    },
+    {
+      "type": "blank_slice",
+      "file": "D:\\Projects\\Project Dox\\data\\processed\\train\\Normal\\normal_train_0068.jpeg",
+      "mean": 25.0,
+      "std": 0.0
+    },
+    {
+      "type": "duplicate",
+      "file": "D:\\Projects\\Project Dox\\data\\processed\\test\\Cancerous\\cancerous_test_0045.png",
+      "original": "D:\\Projects\\Project Dox\\data\\processed\\val\\Cancerous\\cancerous_val_0045.png"
+    },
+    {
+      "type": "duplicate",
+      "file": "D:\\Projects\\Project Dox\\data\\processed\\test\\Cancerous\\cancerous_test_0046.png",
+      "original": "D:\\Projects\\Project Dox\\data\\processed\\val\\Cancerous\\cancerous_val_0046.png"
+    },
+    {
+      "type": "duplicate",
+      "file": "D:\\Projects\\Project Dox\\data\\processed\\test\\Cancerous\\cancerous_test_0047.png",
+      "original": "D:\\Projects\\Project Dox\\data\\processed\\val\\Cancerous\\cancerous_val_0047.png"
+    },
+    {
+      "type": "duplicate",
+      "file": "D:\\Projects\\Project Dox\\data\\processed\\test\\Cancerous\\cancerous_test_0048.png",
+      "original": "D:\\Projects\\Project Dox\\data\\processed\\val\\Cancerous\\cancerous_val_0048.png"
+    },
+    {
+      "type": "duplicate",
+      "file": "D:\\Projects\\Project Dox\\data\\processed\\test\\Cancerous\\cancerous_test_0049.png",
+      "original": "D:\\Projects\\Project Dox\\data\\processed\\val\\Cancerous\\cancerous_val_0049.png"
+    },
+    {
+      "type": "duplicate",
+      "file": "D:\\Projects\\Project Dox\\data\\processed\\test\\Cancerous\\cancerous_test_0050.png",
+      "original": "D:\\Projects\\Project Dox\\data\\processed\\val\\Cancerous\\cancerous_val_0050.png"
+    },
+    {
+      "type": "duplicate",
+      "file": "D:\\Projects\\Project Dox\\data\\processed\\test\\Cancerous\\cancerous_test_0051.png",
+      "original": "D:\\Projects\\Project Dox\\data\\processed\\val\\Cancerous\\cancerous_val_0051.png"
+    },
+    {
+      "type": "duplicate",
+      "file": "D:\\Projects\\Project Dox\\data\\processed\\test\\Cancerous\\cancerous_test_0052.png",
+      "original": "D:\\Projects\\Project Dox\\data\\processed\\val\\Cancerous\\cancerous_val_0052.png"
+    },
+    {
+      "type": "duplicate",
+      "file": "D:\\Projects\\Project Dox\\data\\processed\\test\\Cancerous\\cancerous_test_0053.png",
+      "original": "D:\\Projects\\Project Dox\\data\\processed\\val\\Cancerous\\cancerous_val_0053.png"
+    },
+    {
+      "type": "duplicate",
+      "file": "D:\\Projects\\Project Dox\\data\\processed\\test\\Cancerous\\cancerous_test_0054.png",
+      "original": "D:\\Projects\\Project Dox\\data\\processed\\val\\Cancerous\\cancerous_val_0054.png"
+    },
+    {
+      "type": "duplicate",
+      "file": "D:\\Projects\\Project Dox\\data\\processed\\test\\Cancerous\\cancerous_test_0055.png",
+      "original": "D:\\Projects\\Project Dox\\data\\processed\\val\\Cancerous\\cancerous_val_0055.png"
+    },
+    {
+      "type": "duplicate",
+      "file": "D:\\Projects\\Project Dox\\data\\processed\\test\\Cancerous\\cancerous_test_0056.png",
+      "original": "D:\\Projects\\Project Dox\\data\\processed\\val\\Cancerous\\cancerous_val_0056.png"
+    },
+    {
+      "type": "duplicate",
+      "file": "D:\\Projects\\Project Dox\\data\\processed\\test\\Cancerous\\cancerous_test_0057.png",
+      "original": "D:\\Projects\\Project Dox\\data\\processed\\val\\Cancerous\\cancerous_val_0057.png"
+    },
+    {
+      "type": "duplicate",
+      "file": "D:\\Projects\\Project Dox\\data\\processed\\test\\Cancerous\\cancerous_test_0058.png",
+      "original": "D:\\Projects\\Project Dox\\data\\processed\\val\\Cancerous\\cancerous_val_0058.png"
+    },
+    {
+      "type": "duplicate",
+      "file": "D:\\Projects\\Project Dox\\data\\processed\\test\\Cancerous\\cancerous_test_0059.png",
+      "original": "D:\\Projects\\Project Dox\\data\\processed\\val\\Cancerous\\cancerous_val_0059.png"
+    },
+    {
+      "type": "duplicate",
+      "file": "D:\\Projects\\Project Dox\\data\\processed\\test\\Cancerous\\cancerous_test_0060.png",
+      "original": "D:\\Projects\\Project Dox\\data\\processed\\val\\Cancerous\\cancerous_val_0060.png"
+    },
+    {
+      "type": "duplicate",
+      "file": "D:\\Projects\\Project Dox\\data\\processed\\test\\Cancerous\\cancerous_test_0061.png",
+      "original": "D:\\Projects\\Project Dox\\data\\processed\\val\\Cancerous\\cancerous_val_0061.png"
+    },
+    {
+      "type": "duplicate",
+      "file": "D:\\Projects\\Project Dox\\data\\processed\\test\\Cancerous\\cancerous_test_0062.png",
+      "original": "D:\\Projects\\Project Dox\\data\\processed\\val\\Cancerous\\cancerous_val_0062.png"
+    },
+    {
+      "type": "duplicate",
+      "file": "D:\\Projects\\Project Dox\\data\\processed\\test\\Cancerous\\cancerous_test_0063.png",
+      "original": "D:\\Projects\\Project Dox\\data\\processed\\val\\Cancerous\\cancerous_val_0063.png"
+    },
+    {
+      "type": "duplicate",
+      "file": "D:\\Projects\\Project Dox\\data\\processed\\test\\Cancerous\\cancerous_test_0064.png",
+      "original": "D:\\Projects\\Project Dox\\data\\processed\\val\\Cancerous\\cancerous_val_0064.png"
+    },
+    {
+      "type": "duplicate",
+      "file": "D:\\Projects\\Project Dox\\data\\processed\\test\\Cancerous\\cancerous_test_0065.png",
+      "original": "D:\\Projects\\Project Dox\\data\\processed\\val\\Cancerous\\cancerous_val_0065.png"
+    },
+    {
+      "type": "duplicate",
+      "file": "D:\\Projects\\Project Dox\\data\\processed\\test\\Cancerous\\cancerous_test_0066.png",
+      "original": "D:\\Projects\\Project Dox\\data\\processed\\val\\Cancerous\\cancerous_val_0066.png"
+    },
+    {
+      "type": "duplicate",
+      "file": "D:\\Projects\\Project Dox\\data\\processed\\test\\Cancerous\\cancerous_test_0067.png",
+      "original": "D:\\Projects\\Project Dox\\data\\processed\\val\\Cancerous\\cancerous_val_0067.png"
+    },
+    {
+      "type": "duplicate",
+      "file": "D:\\Projects\\Project Dox\\data\\processed\\test\\Cancerous\\cancerous_test_0068.png",
+      "original": "D:\\Projects\\Project Dox\\data\\processed\\val\\Cancerous\\cancerous_val_0068.png"
+    },
+    {
+      "type": "duplicate",
+      "file": "D:\\Projects\\Project Dox\\data\\processed\\test\\Cancerous\\cancerous_test_0069.png",
+      "original": "D:\\Projects\\Project Dox\\data\\processed\\val\\Cancerous\\cancerous_val_0069.png"
+    },
+    {
+      "type": "duplicate",
+      "file": "D:\\Projects\\Project Dox\\data\\processed\\test\\Cancerous\\cancerous_test_0070.png",
+      "original": "D:\\Projects\\Project Dox\\data\\processed\\val\\Cancerous\\cancerous_val_0070.png"
+    },
+    {
+      "type": "duplicate",
+      "file": "D:\\Projects\\Project Dox\\data\\processed\\test\\Cancerous\\cancerous_test_0071.png",
+      "original": "D:\\Projects\\Project Dox\\data\\processed\\val\\Cancerous\\cancerous_val_0071.png"
+    },
+    {
+      "type": "duplicate",
+      "file": "D:\\Projects\\Project Dox\\data\\processed\\test\\Cancerous\\cancerous_test_0072.png",
+      "original": "D:\\Projects\\Project Dox\\data\\processed\\val\\Cancerous\\cancerous_val_0072.png"
+    },
+    {
+      "type": "duplicate",
+      "file": "D:\\Projects\\Project Dox\\data\\processed\\test\\Cancerous\\cancerous_test_0073.png",
+      "original": "D:\\Projects\\Project Dox\\data\\processed\\val\\Cancerous\\cancerous_val_0073.png"
+    },
+    {
+      "type": "duplicate",
+      "file": "D:\\Projects\\Project Dox\\data\\processed\\test\\Cancerous\\cancerous_test_0074.png",
+      "original": "D:\\Projects\\Project Dox\\data\\processed\\val\\Cancerous\\cancerous_val_0074.png"
+    },
+    {
+      "type": "duplicate",
+      "file": "D:\\Projects\\Project Dox\\data\\processed\\test\\Cancerous\\cancerous_test_0075.png",
+      "original": "D:\\Projects\\Project Dox\\data\\processed\\val\\Cancerous\\cancerous_val_0075.png"
+    },
+    {
+      "type": "duplicate",
+      "file": "D:\\Projects\\Project Dox\\data\\processed\\test\\Cancerous\\cancerous_test_0076.png",
+      "original": "D:\\Projects\\Project Dox\\data\\processed\\val\\Cancerous\\cancerous_val_0076.png"
+    },
+    {
+      "type": "duplicate",
+      "file": "D:\\Projects\\Project Dox\\data\\processed\\test\\Cancerous\\cancerous_test_0077.png",
+      "original": "D:\\Projects\\Project Dox\\data\\processed\\val\\Cancerous\\cancerous_val_0077.png"
+    },
+    {
+      "type": "duplicate",
+      "file": "D:\\Projects\\Project Dox\\data\\processed\\test\\Cancerous\\cancerous_test_0078.png",
+      "original": "D:\\Projects\\Project Dox\\data\\processed\\val\\Cancerous\\cancerous_val_0078.png"
+    },
+    {
+      "type": "duplicate",
+      "file": "D:\\Projects\\Project Dox\\data\\processed\\test\\Cancerous\\cancerous_test_0079.png",
+      "original": "D:\\Projects\\Project Dox\\data\\processed\\val\\Cancerous\\cancerous_val_0079.png"
+    },
+    {
+      "type": "duplicate",
+      "file": "D:\\Projects\\Project Dox\\data\\processed\\test\\Normal\\normal_test_0045.png",
+      "original": "D:\\Projects\\Project Dox\\data\\processed\\val\\Normal\\normal_val_0045.png"
+    },
+    {
+      "type": "duplicate",
+      "file": "D:\\Projects\\Project Dox\\data\\processed\\test\\Normal\\normal_test_0046.png",
+      "original": "D:\\Projects\\Project Dox\\data\\processed\\val\\Normal\\normal_val_0046.png"
+    },
+    {
+      "type": "duplicate",
+      "file": "D:\\Projects\\Project Dox\\data\\processed\\test\\Normal\\normal_test_0047.png",
+      "original": "D:\\Projects\\Project Dox\\data\\processed\\val\\Normal\\normal_val_0047.png"
+    },
+    {
+      "type": "duplicate",
+      "file": "D:\\Projects\\Project Dox\\data\\processed\\test\\Normal\\normal_test_0048.png",
+      "original": "D:\\Projects\\Project Dox\\data\\processed\\val\\Normal\\normal_val_0048.png"
+    },
+    {
+      "type": "duplicate",
+      "file": "D:\\Projects\\Project Dox\\data\\processed\\test\\Normal\\normal_test_0049.png",
+      "original": "D:\\Projects\\Project Dox\\data\\processed\\val\\Normal\\normal_val_0049.png"
+    },
+    {
+      "type": "duplicate",
+      "file": "D:\\Projects\\Project Dox\\data\\processed\\test\\Normal\\normal_test_0050.png",
+      "original": "D:\\Projects\\Project Dox\\data\\processed\\val\\Normal\\normal_val_0050.png"
+    },
+    {
+      "type": "duplicate",
+      "file": "D:\\Projects\\Project Dox\\data\\processed\\test\\Normal\\normal_test_0051.png",
+      "original": "D:\\Projects\\Project Dox\\data\\processed\\val\\Normal\\normal_val_0051.png"
+    },
+    {
+      "type": "duplicate",
+      "file": "D:\\Projects\\Project Dox\\data\\processed\\test\\Normal\\normal_test_0052.png",
+      "original": "D:\\Projects\\Project Dox\\data\\processed\\val\\Normal\\normal_val_0052.png"
+    },
+    {
+      "type": "duplicate",
+      "file": "D:\\Projects\\Project Dox\\data\\processed\\test\\Normal\\normal_test_0053.png",
+      "original": "D:\\Projects\\Project Dox\\data\\processed\\val\\Normal\\normal_val_0053.png"
+    },
+    {
+      "type": "duplicate",
+      "file": "D:\\Projects\\Project Dox\\data\\processed\\test\\Normal\\normal_test_0054.png",
+      "original": "D:\\Projects\\Project Dox\\data\\processed\\val\\Normal\\normal_val_0054.png"
+    },
+    {
+      "type": "duplicate",
+      "file": "D:\\Projects\\Project Dox\\data\\processed\\test\\Normal\\normal_test_0055.png",
+      "original": "D:\\Projects\\Project Dox\\data\\processed\\val\\Normal\\normal_val_0055.png"
+    },
+    {
+      "type": "duplicate",
+      "file": "D:\\Projects\\Project Dox\\data\\processed\\test\\Normal\\normal_test_0056.png",
+      "original": "D:\\Projects\\Project Dox\\data\\processed\\val\\Normal\\normal_val_0056.png"
+    },
+    {
+      "type": "duplicate",
+      "file": "D:\\Projects\\Project Dox\\data\\processed\\test\\Normal\\normal_test_0057.png",
+      "original": "D:\\Projects\\Project Dox\\data\\processed\\val\\Normal\\normal_val_0057.png"
+    },
+    {
+      "type": "duplicate",
+      "file": "D:\\Projects\\Project Dox\\data\\processed\\test\\Normal\\normal_test_0058.png",
+      "original": "D:\\Projects\\Project Dox\\data\\processed\\val\\Normal\\normal_val_0058.png"
+    },
+    {
+      "type": "duplicate",
+      "file": "D:\\Projects\\Project Dox\\data\\processed\\test\\Normal\\normal_test_0059.png",
+      "original": "D:\\Projects\\Project Dox\\data\\processed\\val\\Normal\\normal_val_0059.png"
+    },
+    {
+      "type": "duplicate",
+      "file": "D:\\Projects\\Project Dox\\data\\processed\\test\\Normal\\normal_test_0060.png",
+      "original": "D:\\Projects\\Project Dox\\data\\processed\\val\\Normal\\normal_val_0060.png"
+    },
+    {
+      "type": "duplicate",
+      "file": "D:\\Projects\\Project Dox\\data\\processed\\test\\Normal\\normal_test_0061.png",
+      "original": "D:\\Projects\\Project Dox\\data\\processed\\val\\Normal\\normal_val_0061.png"
+    },
+    {
+      "type": "duplicate",
+      "file": "D:\\Projects\\Project Dox\\data\\processed\\test\\Normal\\normal_test_0062.png",
+      "original": "D:\\Projects\\Project Dox\\data\\processed\\val\\Normal\\normal_val_0062.png"
+    },
+    {
+      "type": "duplicate",
+      "file": "D:\\Projects\\Project Dox\\data\\processed\\test\\Normal\\normal_test_0063.png",
+      "original": "D:\\Projects\\Project Dox\\data\\processed\\val\\Normal\\normal_val_0063.png"
+    },
+    {
+      "type": "duplicate",
+      "file": "D:\\Projects\\Project Dox\\data\\processed\\test\\Normal\\normal_test_0064.png",
+      "original": "D:\\Projects\\Project Dox\\data\\processed\\val\\Normal\\normal_val_0064.png"
+    },
+    {
+      "type": "duplicate",
+      "file": "D:\\Projects\\Project Dox\\data\\processed\\test\\Normal\\normal_test_0065.png",
+      "original": "D:\\Projects\\Project Dox\\data\\processed\\val\\Normal\\normal_val_0065.png"
+    },
+    {
+      "type": "duplicate",
+      "file": "D:\\Projects\\Project Dox\\data\\processed\\test\\Normal\\normal_test_0066.png",
+      "original": "D:\\Projects\\Project Dox\\data\\processed\\val\\Normal\\normal_val_0066.png"
+    },
+    {
+      "type": "duplicate",
+      "file": "D:\\Projects\\Project Dox\\data\\processed\\test\\Normal\\normal_test_0067.png",
+      "original": "D:\\Projects\\Project Dox\\data\\processed\\val\\Normal\\normal_val_0067.png"
+    },
+    {
+      "type": "duplicate",
+      "file": "D:\\Projects\\Project Dox\\data\\processed\\test\\Normal\\normal_test_0068.png",
+      "original": "D:\\Projects\\Project Dox\\data\\processed\\val\\Normal\\normal_val_0068.png"
+    },
+    {
+      "type": "duplicate",
+      "file": "D:\\Projects\\Project Dox\\data\\processed\\test\\Normal\\normal_test_0069.png",
+      "original": "D:\\Projects\\Project Dox\\data\\processed\\val\\Normal\\normal_val_0069.png"
+    },
+    {
+      "type": "duplicate",
+      "file": "D:\\Projects\\Project Dox\\data\\processed\\test\\Normal\\normal_test_0070.png",
+      "original": "D:\\Projects\\Project Dox\\data\\processed\\val\\Normal\\normal_val_0070.png"
+    },
+    {
+      "type": "duplicate",
+      "file": "D:\\Projects\\Project Dox\\data\\processed\\test\\Normal\\normal_test_0071.png",
+      "original": "D:\\Projects\\Project Dox\\data\\processed\\val\\Normal\\normal_val_0071.png"
+    },
+    {
+      "type": "duplicate",
+      "file": "D:\\Projects\\Project Dox\\data\\processed\\test\\Normal\\normal_test_0072.png",
+      "original": "D:\\Projects\\Project Dox\\data\\processed\\val\\Normal\\normal_val_0072.png"
+    },
+    {
+      "type": "duplicate",
+      "file": "D:\\Projects\\Project Dox\\data\\processed\\test\\Normal\\normal_test_0073.png",
+      "original": "D:\\Projects\\Project Dox\\data\\processed\\val\\Normal\\normal_val_0073.png"
+    },
+    {
+      "type": "duplicate",
+      "file": "D:\\Projects\\Project Dox\\data\\processed\\test\\Normal\\normal_test_0074.png",
+      "original": "D:\\Projects\\Project Dox\\data\\processed\\val\\Normal\\normal_val_0074.png"
+    },
+    {
+      "type": "duplicate",
+      "file": "D:\\Projects\\Project Dox\\data\\processed\\test\\Normal\\normal_test_0075.png",
+      "original": "D:\\Projects\\Project Dox\\data\\processed\\val\\Normal\\normal_val_0075.png"
+    },
+    {
+      "type": "duplicate",
+      "file": "D:\\Projects\\Project Dox\\data\\processed\\test\\Normal\\normal_test_0076.png",
+      "original": "D:\\Projects\\Project Dox\\data\\processed\\val\\Normal\\normal_val_0076.png"
+    },
+    {
+      "type": "duplicate",
+      "file": "D:\\Projects\\Project Dox\\data\\processed\\test\\Normal\\normal_test_0077.png",
+      "original": "D:\\Projects\\Project Dox\\data\\processed\\val\\Normal\\normal_val_0077.png"
+    },
+    {
+      "type": "duplicate",
+      "file": "D:\\Projects\\Project Dox\\data\\processed\\test\\Normal\\normal_test_0078.png",
+      "original": "D:\\Projects\\Project Dox\\data\\processed\\val\\Normal\\normal_val_0078.png"
+    },
+    {
+      "type": "duplicate",
+      "file": "D:\\Projects\\Project Dox\\data\\processed\\test\\Normal\\normal_test_0079.png",
+      "original": "D:\\Projects\\Project Dox\\data\\processed\\val\\Normal\\normal_val_0079.png"
+    }
+  ]
+}

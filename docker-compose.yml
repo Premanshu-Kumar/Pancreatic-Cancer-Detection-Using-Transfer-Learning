@@ -1,0 +1,30 @@
+version: "3.8"
+
+services:
+  cancer-detection-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: pancreatic-cancer-detection
+    ports:
+      - "8000:8000"
+    environment:
+      - APP_HOST=0.0.0.0
+      - APP_PORT=8000
+      - PORT=8000
+      - DEFAULT_MODEL=resnet50
+      - MAX_UPLOAD_SIZE_MB=10
+      - PYTHONUNBUFFERED=1
+    volumes:
+      # Mount models and results for persistence and fast model swapping
+      - ./models:/app/models
+      - ./data:/app/data:ro
+      - ./results:/app/results
+      - ./app/uploads:/app/app/uploads
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
