@@ -45,6 +45,9 @@ class GradCAM:
         "vgg16": "block5_conv3",
         "resnet50": "conv5_block3_out",
         "inceptionv3": "mixed10",
+        "efficientnetv2": "top_activation",
+        "efficientnet": "top_activation",
+        "convnext": "layer_normalization",
     }
 
     def __init__(
@@ -321,3 +324,85 @@ class GradCAM:
         plt.close(fig)
 
         return output_path
+
+
+def extract_lesion_bounding_boxes(
+    heatmap: np.ndarray,
+    threshold: float = 0.5,
+    min_area: int = 25,
+) -> list:
+    """
+    Extract lesion bounding boxes (x, y, w, h) from high-activation Grad-CAM regions.
+    """
+    h_norm = np.clip(heatmap, 0.0, 1.0)
+    binary_mask = (h_norm >= threshold).astype(np.uint8) * 255
+    contours, _ = cv2.findContours(binary_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+
+    boxes = []
+    for cnt in contours:
+        area = cv2.contourArea(cnt)
+        if area >= min_area:
+            x, y, w, h = cv2.boundingRect(cnt)
+            boxes.append((int(x), int(y), int(w), int(h)))
+    return boxes
+
+
+class GradCAMPlusPlus(GradCAM):
+    """
+    Grad-CAM++ (Generalized Gradient-based Visual Explanations).
+    Calculates weighted positive partial derivatives with higher-order gradients
+    for improved localization of multi-focal and small pancreatic lesions.
+    """
+
+    def compute_heatmap(self, img_tensor: tf.Tensor, pred_index: Optional[int] = None) -> np.ndarray:
+        """Compute Grad-CAM++ activation map using 2nd and 3rd order gradients."""
+        model_or_tuple = self._get_conv_layer_model()
+
+        with tf.GradientTape() as tape3:
+            with tf.GradientTape() as tape2:
+                with tf.GradientTape() as tape1:
+                    if isinstance(model_or_tuple, tuple):
+                        last_conv_model, classifier_model = model_or_tuple
+                        conv_outputs = last_conv_model(img_tensor)
+                        tape1.watch(conv_outputs)
+                        tape2.watch(conv_outputs)
+                        tape3.watch(conv_outputs)
+                        predictions = classifier_model(conv_outputs)
+                    else:
+                        conv_outputs, predictions = model_or_tuple(img_tensor)
+                        tape1.watch(conv_outputs)
+                        tape2.watch(conv_outputs)
+                        tape3.watch(conv_outputs)
+
+                    if pred_index is None:
+                        loss = predictions[:, 0]
+                    else:
+                        loss = predictions[:, pred_index]
+
+                grads1 = tape1.gradient(loss, conv_outputs)
+            grads2 = tape2.gradient(grads1, conv_outputs)
+        grads3 = tape3.gradient(grads2, conv_outputs)
+
+        # Grad-CAM++ weights calculation
+        eps = 1e-8
+        conv_first = conv_outputs[0]
+        g1 = grads1[0]
+        g2 = grads2[0] if grads2 is not None else tf.zeros_like(g1)
+        g3 = grads3[0] if grads3 is not None else tf.zeros_like(g1)
+
+        denominator = 2.0 * g2 + tf.reduce_sum(conv_first * g3, axis=[0, 1], keepdims=True)
+        denominator = tf.where(denominator != 0.0, denominator, tf.ones_like(denominator) * eps)
+        alpha = g2 / denominator
+
+        relu_grads = tf.nn.relu(g1)
+        weights = tf.reduce_sum(alpha * relu_grads, axis=[0, 1])
+
+        # Weighted combination of feature maps
+        cam = tf.reduce_sum(conv_first * weights, axis=-1)
+        cam = tf.nn.relu(cam).numpy()
+
+        cam_max = np.max(cam)
+        if cam_max > 0:
+            cam = cam / cam_max
+        return cam
+
