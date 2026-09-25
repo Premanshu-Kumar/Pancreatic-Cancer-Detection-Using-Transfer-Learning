@@ -17,6 +17,26 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 import config
 
 
+import hashlib
+
+
+def calculate_md5(file_path: Path, chunk_size: int = 65536) -> str:
+    """Calculate MD5 hash of a file in chunks."""
+    md5 = hashlib.md5()
+    with open(file_path, "rb") as f:
+        for chunk in iter(lambda: f.read(chunk_size), b""):
+            md5.update(chunk)
+    return md5.hexdigest()
+
+
+def verify_md5(file_path: Path, expected_md5: str) -> bool:
+    """Verify file integrity using MD5 checksum."""
+    if not Path(file_path).exists():
+        return False
+    actual_hash = calculate_md5(Path(file_path))
+    return actual_hash.lower() == expected_md5.lower()
+
+
 def parse_args():
     parser = argparse.ArgumentParser(
         description="Download and organize Pancreatic Cancer CT datasets"
@@ -37,6 +57,18 @@ def parse_args():
         type=str,
         default=None,
         help="Specific Kaggle dataset slug to download",
+    )
+    parser.add_argument(
+        "--output-dir",
+        type=str,
+        default=None,
+        help="Custom destination directory (e.g., external drive like E:\\CT_Data)",
+    )
+    parser.add_argument(
+        "--expected-md5",
+        type=str,
+        default=None,
+        help="Expected MD5 checksum to verify archive integrity",
     )
     return parser.parse_args()
 

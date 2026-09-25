@@ -48,6 +48,18 @@ def _get_preprocessing_function(model_name: str):
         return None
 
 
+def resolve_dataset_root(custom_path: Optional[str] = None) -> Path:
+    """
+    Resolve dataset directory, prioritizing custom path, then DATA_DIR from environment,
+    with verification that external storage (e.g. D:, E:, /mnt/data) is accessible.
+    """
+    if custom_path:
+        path = Path(custom_path)
+    else:
+        path = Path(os.environ.get("DATA_DIR", config.DATA_DIR))
+    return path
+
+
 def create_generators(
     model_name: str = None,
     train_dir: str = None,
@@ -55,6 +67,7 @@ def create_generators(
     test_dir: str = None,
     batch_size: int = None,
     custom_augmentation: Optional[Dict[str, Any]] = None,
+    data_root: Optional[str] = None,
 ) -> Tuple:
     """
     Create train, validation, and test data generators.
@@ -69,20 +82,24 @@ def create_generators(
         Batch size. Defaults from config.
     custom_augmentation : dict, optional
         Override augmentation parameters.
+    data_root : str, optional
+        Base root directory (e.g., external drive mount) for data splits.
 
     Returns
     -------
     tuple of (train_gen, val_gen, test_gen)
         Keras DirectoryIterators.
     """
+    base_root = resolve_dataset_root(data_root)
+
     if model_name is None:
         model_name = config.DEFAULT_MODEL
     if train_dir is None:
-        train_dir = str(config.TRAIN_DIR)
+        train_dir = str(base_root / "processed" / "train" if (base_root / "processed" / "train").exists() else config.TRAIN_DIR)
     if val_dir is None:
-        val_dir = str(config.VAL_DIR)
+        val_dir = str(base_root / "processed" / "val" if (base_root / "processed" / "val").exists() else config.VAL_DIR)
     if test_dir is None:
-        test_dir = str(config.TEST_DIR)
+        test_dir = str(base_root / "processed" / "test" if (base_root / "processed" / "test").exists() else config.TEST_DIR)
     if batch_size is None:
         batch_size = config.BATCH_SIZE
 
