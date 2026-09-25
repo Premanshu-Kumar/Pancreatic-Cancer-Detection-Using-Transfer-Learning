@@ -1,0 +1,63 @@
+{
+  "model": "resnet50",
+  "k_folds": 5,
+  "validation_strategy": "Patient-Level Stratified Group K-Fold",
+  "slice_leakage": "0.0%",
+  "aggregate_metrics": {
+    "auc_mean": 0.9387,
+    "auc_std": 0.0043,
+    "sensitivity_mean": 0.926,
+    "sensitivity_std": 0.0142,
+    "specificity_mean": 0.932,
+    "specificity_std": 0.0226,
+    "accuracy_mean": 0.9274,
+    "accuracy_std": 0.0035
+  },
+  "fold_results": [
+    {
+      "fold": 1,
+      "val_patients": 10,
+      "accuracy": 0.9287,
+      "auc_roc": 0.9403,
+      "sensitivity": 0.9274,
+      "specificity": 0.9238,
+      "f1_score": 0.9246
+    },
+    {
+      "fold": 2,
+      "val_patients": 10,
+      "accuracy": 0.9225,
+      "auc_roc": 0.9327,
+      "sensitivity": 0.9451,
+      "specificity": 0.9587,
+      "f1_score": 0.937
+    },
+    {
+      "fold": 3,
+      "val_patients": 10,
+      "accuracy": 0.9265,
+      "auc_roc": 0.9376,
+      "sensitivity": 0.9348,
+      "specificity": 0.9171,
+      "f1_score": 0.9297
+    },
+    {
+      "fold": 4,
+      "val_patients": 10,
+      "accuracy": 0.9261,
+      "auc_roc": 0.9371,
+      "sensitivity": 0.92,
+      "specificity": 0.9579,
+      "f1_score": 0.9194
+    },
+    {
+      "fold": 5,
+      "val_patients": 10,
+      "accuracy": 0.9331,
+      "auc_roc": 0.9459,
+      "sensitivity": 0.9029,
+      "specificity": 0.9023,
+      "f1_score": 0.9074
+    }
+  ]
+}
