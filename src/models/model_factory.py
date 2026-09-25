@@ -14,6 +14,8 @@ from .base_model import BaseCancerModel
 from .vgg16_model import VGG16CancerModel
 from .resnet50_model import ResNet50CancerModel
 from .inception_model import InceptionV3CancerModel
+from .efficientnet import EfficientNetV2CancerModel
+from .convnext import ConvNeXtCancerModel
 
 
 # Registry of available models
@@ -21,6 +23,9 @@ _MODEL_REGISTRY = {
     "vgg16": VGG16CancerModel,
     "resnet50": ResNet50CancerModel,
     "inceptionv3": InceptionV3CancerModel,
+    "efficientnet": EfficientNetV2CancerModel,
+    "efficientnetv2": EfficientNetV2CancerModel,
+    "convnext": ConvNeXtCancerModel,
 }
 
 
