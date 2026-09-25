@@ -60,8 +60,12 @@ def compute_metrics(
     cm = confusion_matrix(y_true, y_pred)
     tn, fp, fn, tp = cm.ravel() if cm.size == 4 else (0, 0, 0, 0)
 
-    # Specificity
+    # Specificity & NPV
     specificity = tn / (tn + fp) if (tn + fp) > 0 else 0.0
+    npv = tn / (tn + fn) if (tn + fn) > 0 else 0.0
+    ppv = float(prec)
+    sensitivity = float(rec)
+    youden_j = float(sensitivity + specificity - 1.0)
 
     # ROC-AUC
     try:
@@ -71,6 +75,11 @@ def compute_metrics(
 
     # ROC curve data
     fpr, tpr, roc_thresholds = roc_curve(y_true, y_pred_proba)
+    j_scores = tpr - fpr
+    best_j_idx = int(np.argmax(j_scores)) if len(j_scores) > 0 else 0
+    optimal_thresh = float(roc_thresholds[best_j_idx]) if best_j_idx < len(roc_thresholds) else 0.5
+    if np.isinf(optimal_thresh) or optimal_thresh > 1.0:
+        optimal_thresh = 1.0
 
     # Precision-Recall curve data
     pr_precision, pr_recall, pr_thresholds = precision_recall_curve(
@@ -81,8 +90,13 @@ def compute_metrics(
         "accuracy": float(acc),
         "precision": float(prec),
         "recall": float(rec),
-        "f1_score": float(f1),
+        "sensitivity": float(sensitivity),
         "specificity": float(specificity),
+        "ppv": float(ppv),
+        "npv": float(npv),
+        "youden_j": float(youden_j),
+        "optimal_threshold_youden": float(optimal_thresh),
+        "f1_score": float(f1),
         "auc_roc": float(auc),
         "confusion_matrix": cm,
         "tp": int(tp),

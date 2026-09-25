@@ -41,7 +41,7 @@ def parse_args():
         "--model",
         type=str,
         default=config.DEFAULT_MODEL,
-        choices=["resnet50", "vgg16", "inceptionv3"],
+        choices=["resnet50", "vgg16", "inceptionv3", "efficientnetv2", "convnext"],
         help="Model architecture name to evaluate (default: resnet50)",
     )
     parser.add_argument(
@@ -87,6 +87,14 @@ def main():
     print(f"\nEvaluating on test dataset ({sample_count} samples)...")
     eval_result = evaluate_model(model, test_gen, verbose=True)
     metrics = eval_result["metrics"]
+
+    print("\n  Clinical Diagnostic Performance:")
+    print(f"  • Sensitivity (TPR)  : {metrics.get('sensitivity', metrics.get('recall', 0.0))*100:.2f}%")
+    print(f"  • Specificity (TNR)  : {metrics.get('specificity', 0.0)*100:.2f}%")
+    print(f"  • PPV (Precision)    : {metrics.get('ppv', metrics.get('precision', 0.0))*100:.2f}%")
+    print(f"  • NPV                : {metrics.get('npv', 0.0)*100:.2f}%")
+    print(f"  • Youden's J Index   : {metrics.get('youden_j', 0.0):.4f}")
+    print(f"  • Optimal Cutoff (J) : {metrics.get('optimal_threshold_youden', 0.50):.4f}")
 
     # Setup plots directory
     output_dir = Path(args.output_dir)
