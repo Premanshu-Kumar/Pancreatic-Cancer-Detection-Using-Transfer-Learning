@@ -128,9 +128,64 @@ async def detect(request: Request):
     )
 
 
-# Import and include the prediction router
+from datetime import datetime, timezone
+from app.schemas import HealthResponse, ModelListResponse, ModelInfo
+
+
+@app.get("/api/health", response_model=HealthResponse, tags=["system"])
+async def api_health():
+    """System health check and loaded model diagnostic probe."""
+    try:
+        import tensorflow as tf
+        gpus = tf.config.list_physical_devices("GPU")
+        has_gpu = len(gpus) > 0
+    except Exception:
+        has_gpu = False
+
+    return HealthResponse(
+        status="healthy",
+        version="2.0.0",
+        loaded_models=list(_loaded_models.keys()),
+        gpu_available=has_gpu,
+        timestamp=datetime.now(timezone.utc).isoformat(),
+    )
+
+
+@app.get("/api/models", response_model=ModelListResponse, tags=["models"])
+async def api_models():
+    """Retrieve metadata and status for all registered transfer learning backbones."""
+    descriptions = {
+        "resnet50": "Residual Network with skip connections for deep CT feature extraction",
+        "vgg16": "Classic sequential architecture with small 3x3 receptive fields",
+        "inceptionv3": "Multi-scale parallel convolutional kernels for varying lesion diameters",
+        "efficientnet": "High-efficiency fused-MBConv backbone with progressive regularization",
+        "efficientnetv2": "High-efficiency fused-MBConv backbone with progressive regularization",
+        "convnext": "Modern pure-convolutional vision backbone with 7x7 depthwise filters",
+    }
+    models_meta = []
+    for name in ModelFactory.list_models():
+        cfg = config.IMAGE_CONFIGS.get(name, {})
+        shape = list(cfg.get("input_shape", (224, 224, 3)))
+        models_meta.append(ModelInfo(
+            name=name,
+            display_name=name.upper(),
+            input_shape=shape,
+            is_loaded=(name in _loaded_models),
+            description=descriptions.get(name, "Deep transfer learning medical backbone"),
+        ))
+    return ModelListResponse(
+        default_model=config.DEFAULT_MODEL,
+        total_models=len(models_meta),
+        models=models_meta,
+    )
+
+
+# Import and include the prediction routers
 from app.routers.prediction import router as prediction_router
+from app.routers.predict import router as predict_api_router
+
 app.include_router(prediction_router)
+app.include_router(predict_api_router)
 
 
 # =============================================================================
