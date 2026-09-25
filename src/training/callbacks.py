@@ -115,6 +115,43 @@ def get_callbacks(
     return callbacks
 
 
+import math
+
+
+class CosineAnnealingWarmRestarts(tf.keras.callbacks.Callback):
+    """
+    Cosine Annealing with Warm Restarts scheduler:
+        lr_t = lr_min + 0.5 * (lr_max - lr_min) * (1 + cos(pi * T_cur / T_i))
+
+    Helps escape sharp local minima and stabilize convergence on medical CT features.
+    """
+
+    def __init__(
+        self,
+        lr_max: float = 1e-3,
+        lr_min: float = 1e-6,
+        first_cycle_steps: int = 10,
+        cycle_mult: float = 1.5,
+    ):
+        super().__init__()
+        self.lr_max = lr_max
+        self.lr_min = lr_min
+        self.first_cycle_steps = first_cycle_steps
+        self.cycle_mult = cycle_mult
+        self.current_step = 0
+        self.cycle_length = first_cycle_steps
+
+    def on_epoch_begin(self, epoch, logs=None):
+        if self.current_step >= self.cycle_length:
+            self.current_step = 0
+            self.cycle_length = int(self.cycle_length * self.cycle_mult)
+
+        fraction = self.current_step / float(max(1, self.cycle_length))
+        lr = self.lr_min + 0.5 * (self.lr_max - self.lr_min) * (1.0 + math.cos(math.pi * fraction))
+        tf.keras.backend.set_value(self.model.optimizer.learning_rate, lr)
+        self.current_step += 1
+
+
 class TrainingProgressCallback(tf.keras.callbacks.Callback):
     """Custom callback that prints a clean progress summary per epoch."""
 
@@ -130,3 +167,4 @@ class TrainingProgressCallback(tf.keras.callbacks.Callback):
         metrics.append(f"LR: {lr:.2e}")
 
         print(f"  Epoch {epoch + 1}: {' | '.join(metrics)}")
+

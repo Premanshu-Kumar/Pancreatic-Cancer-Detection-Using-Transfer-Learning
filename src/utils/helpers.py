@@ -129,3 +129,20 @@ def _format_params(n: int) -> str:
     elif n >= 1e3:
         return f"{n / 1e3:.1f}K"
     return str(n)
+
+
+def enable_mixed_precision(policy_name: str = "mixed_float16") -> str:
+    """
+    Enable mixed precision (FP16) compute to accelerate GPU throughput 2-3x
+    and decrease VRAM consumption while preserving numerical stability.
+    """
+    try:
+        import tensorflow as tf
+        policy = tf.keras.mixed_precision.Policy(policy_name)
+        tf.keras.mixed_precision.set_global_policy(policy)
+        print(f"  ✓ Mixed Precision enabled: {policy.name} (compute={policy.compute_dtype}, variable={policy.variable_dtype})")
+        return policy.name
+    except Exception as e:
+        print(f"  ⚠ Could not enable mixed precision: {e}")
+        return "float32"
+
