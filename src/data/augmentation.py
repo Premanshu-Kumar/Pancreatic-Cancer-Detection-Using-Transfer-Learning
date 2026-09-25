@@ -5,7 +5,7 @@ Configures image augmentation using Keras ImageDataGenerator
 to improve model generalization and combat overfitting.
 """
 
-from typing import Dict, Any, Optional
+from typing import Dict, Any, Optional, Tuple
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 
 import sys
@@ -14,21 +14,89 @@ sys.path.append(str(Path(__file__).resolve().parent.parent.parent))
 import config
 
 
+import cv2
+import numpy as np
+
+try:
+    import albumentations as A
+    ALBUMENTATIONS_AVAILABLE = True
+except ImportError:
+    ALBUMENTATIONS_AVAILABLE = False
+
+
+def get_medical_transforms(
+    img_size: Optional[Tuple[int, int]] = None,
+    is_training: bool = True,
+    p_flip: float = 0.5,
+    p_contrast: float = 0.3,
+):
+    """
+    Build a clinically sound Albumentations pipeline for abdominal CT scans.
+    Enforces medical imaging constraints:
+    - Retains anatomical axis orientation (avoids unrealistic vertical flipping).
+    - Uses subtle affine translation (max 6%) and gentle rotation (+-15 deg or 90 deg).
+    - Preserves CT HU intensity distributions by avoiding severe artificial color distortions.
+    """
+    if not ALBUMENTATIONS_AVAILABLE:
+        return None
+
+    if not is_training:
+        transforms = []
+        if img_size:
+            transforms.append(A.Resize(height=img_size[0], width=img_size[1]))
+        return A.Compose(transforms)
+
+    aug_list = []
+    if img_size:
+        aug_list.append(A.Resize(height=img_size[0], width=img_size[1]))
+
+    # Safe anatomical transforms
+    aug_list.extend([
+        A.HorizontalFlip(p=p_flip),
+        A.RandomRotate90(p=0.4),
+        A.ShiftScaleRotate(
+            shift_limit=0.06,
+            scale_limit=0.08,
+            rotate_limit=15,
+            border_mode=cv2.BORDER_REFLECT_101,
+            p=0.5,
+        ),
+        A.RandomBrightnessContrast(
+            brightness_limit=0.10,
+            contrast_limit=0.15,
+            p=p_contrast,
+        ),
+    ])
+    return A.Compose(aug_list)
+
+
+def apply_medical_augmentation(image: np.ndarray, transform=None) -> np.ndarray:
+    """
+    Apply medical augmentation pipeline to a single image.
+    """
+    if transform is None:
+        transform = get_medical_transforms(is_training=True)
+
+    if transform is not None:
+        augmented = transform(image=image)
+        return augmented["image"]
+
+    # Fallback NumPy subtle augmentations if albumentations is unavailable
+    img = image.copy()
+    if np.random.rand() > 0.5:
+        img = np.fliplr(img)
+    return img
+
+
 def get_augmentation_config(custom_config: Optional[Dict[str, Any]] = None) -> dict:
     """
-    Get the data augmentation configuration.
-
-    Parameters
-    ----------
-    custom_config : dict, optional
-        Override default augmentation parameters.
-
-    Returns
-    -------
-    dict
-        Augmentation configuration dictionary.
+    Get the data augmentation configuration with medical-safe constraints.
     """
     aug_config = config.AUGMENTATION_CONFIG.copy()
+    # Medical safety overrides: prevent inverted anatomy
+    aug_config["vertical_flip"] = False
+    aug_config["rotation_range"] = min(aug_config.get("rotation_range", 15), 15)
+    aug_config["zoom_range"] = min(aug_config.get("zoom_range", 0.1), 0.1)
     if custom_config:
         aug_config.update(custom_config)
     return aug_config
