@@ -1,0 +1,7 @@
+filepath,filename,patient_id,label,class_name
+D:\Projects\Project Dox\data\Normal\patient_normal_007_slice_001.png,patient_normal_007_slice_001.png,patient_normal_007,0,Normal
+D:\Projects\Project Dox\data\Normal\patient_normal_007_slice_002.png,patient_normal_007_slice_002.png,patient_normal_007,0,Normal
+D:\Projects\Project Dox\data\Normal\patient_normal_007_slice_003.png,patient_normal_007_slice_003.png,patient_normal_007,0,Normal
+D:\Projects\Project Dox\data\Cancerous\patient_cancerous_003_slice_001.png,patient_cancerous_003_slice_001.png,patient_cancerous_003,1,Cancerous
+D:\Projects\Project Dox\data\Cancerous\patient_cancerous_003_slice_002.png,patient_cancerous_003_slice_002.png,patient_cancerous_003,1,Cancerous
+D:\Projects\Project Dox\data\Cancerous\patient_cancerous_003_slice_003.png,patient_cancerous_003_slice_003.png,patient_cancerous_003,1,Cancerous
