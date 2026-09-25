@@ -1,0 +1,27 @@
+# =============================================================================
+# Render Blueprint Configuration (Infrastructure-as-Code)
+# https://render.com/docs/blueprint-spec
+# =============================================================================
+
+services:
+  - type: web
+    name: pancreatic-cancer-detection
+    env: docker
+    dockerfilePath: ./Dockerfile
+    plan: free
+    region: oregon
+    healthCheckPath: /api/health
+    autoDeploy: true
+    envVars:
+      - key: PORT
+        value: 10000
+      - key: APP_HOST
+        value: 0.0.0.0
+      - key: DEFAULT_MODEL
+        value: resnet50
+      - key: PYTHONUNBUFFERED
+        value: 1
+      - key: TF_ENABLE_ONEDNN_OPTS
+        value: 0
+      - key: MAX_UPLOAD_SIZE_MB
+        value: 10

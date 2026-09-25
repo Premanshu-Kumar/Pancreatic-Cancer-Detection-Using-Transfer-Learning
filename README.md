@@ -7,6 +7,7 @@
 [![TensorFlow](https://img.shields.io/badge/TensorFlow-2.12+-FF6F00?style=flat&logo=tensorflow&logoColor=white)](https://tensorflow.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Hugging Face Spaces](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-yellow)](https://huggingface.co/spaces)
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy)
 
 > **An enterprise-grade, peer-review quality Clinical Decision Support System (CDSS) for automated Pancreatic Adenocarcinoma detection and localized explainability on abdominal CT scans.**
 
@@ -183,12 +184,34 @@ Service will be live at `http://localhost:8000` (Healthcheck endpoint: `http://l
 
 ---
 
+---
+
 ### Option 3: Cloud Deployment (Hugging Face Spaces)
 
 This repository is pre-configured for Docker-based deployment on **Hugging Face Spaces**:
 1. Create a new Space on [Hugging Face](https://huggingface.co/new-space) and select **Docker** as the SDK.
 2. Link this GitHub repository or push directly to the Hugging Face Space Git remote.
 3. The multi-stage `Dockerfile` will automatically bind to port `7860` via the `$PORT` environment variable.
+
+---
+
+### Option 4: Cloud Deployment (Render)
+
+This repository includes a native **Render Blueprint (`render.yaml`)** for 1-click deployment:
+
+#### Method A: 1-Click Blueprint (Recommended)
+1. Go to the [Render Dashboard](https://dashboard.render.com).
+2. Click **New +** > **Blueprint**.
+3. Connect your GitHub repository: `Premanshu-Kumar/Pancreatic-Cancer-Detection-Using-Transfer-Learning`.
+4. Render will automatically detect [`render.yaml`](render.yaml) and configure the Docker runtime, healthcheck, and port `10000`.
+5. Click **Apply** to deploy.
+
+#### Method B: Manual Web Service
+1. In [Render Dashboard](https://dashboard.render.com), click **New +** > **Web Service**.
+2. Select **Build and deploy from a Git repository** and pick your repo.
+3. Choose **Docker** as the environment and specify `./Dockerfile`.
+4. Set Health Check Path to `/api/health`.
+5. Click **Deploy Web Service**.
 
 ---
 

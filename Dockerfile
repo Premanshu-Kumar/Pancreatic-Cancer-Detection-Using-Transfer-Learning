@@ -64,12 +64,12 @@ RUN mkdir -p /app/app/uploads /app/results /app/models /app/data && \
 
 USER appuser
 
-# Expose FastAPI service port
-EXPOSE 8000 7860
+# Expose FastAPI service port (8000: local, 7860: HF Spaces, 10000: Render)
+EXPOSE 8000 7860 10000
 
 # Health check to ensure API is responsive
 HEALTHCHECK --interval=30s --timeout=10s --start-period=20s --retries=3 \
-    CMD curl -f http://localhost:${PORT}/api/health || exit 1
+    CMD curl -f http://localhost:${PORT:-8000}/api/health || exit 1
 
 # Launch uvicorn web server
-CMD ["sh", "-c", "uvicorn app.main:app --host 0.0.0.0 --port ${PORT}"]
+CMD ["sh", "-c", "uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000}"]
