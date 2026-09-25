@@ -16,6 +16,8 @@ from src.data.preprocessing import (
     preprocess_directory,
     validate_image,
     get_image_stats,
+    apply_pancreatic_window,
+    apply_clahe,
 )
 
 
@@ -139,3 +141,39 @@ class TestGetImageStats:
         assert len(stats["sizes"]) == 5
         assert isinstance(stats["mean_size"], tuple)
         assert len(stats["formats"]) > 0
+
+
+class TestPancreaticWindowAndClahe:
+    """Tests for Day 8 pancreatic windowing and CLAHE contrast enhancement."""
+
+    def test_pancreatic_windowing_bounds(self):
+        """Test HU windowing clips values to expected [0, 1] range."""
+        raw_hu = np.array([-1000.0, -130.0, 45.0, 220.0, 1000.0], dtype=np.float32)
+        windowed = apply_pancreatic_window(raw_hu, window_width=350, window_level=45)
+        assert windowed.min() >= 0.0
+        assert windowed.max() <= 1.0
+        assert np.isclose(windowed[0], 0.0)
+        assert np.isclose(windowed[2], 0.5)
+        assert np.isclose(windowed[4], 1.0)
+
+    def test_clahe_enhancement(self, sample_image_path):
+        """Test CLAHE processing on RGB image."""
+        img = preprocess_image(sample_image_path, target_size=(128, 128), clahe=True)
+        assert isinstance(img, np.ndarray)
+        assert img.shape == (128, 128, 3)
+        assert img.min() >= 0.0
+        assert img.max() <= 1.0
+
+    def test_preprocess_with_window_and_clahe(self, sample_image_path):
+        """Test combining both windowing and CLAHE."""
+        img = preprocess_image(
+            sample_image_path,
+            target_size=(128, 128),
+            window=True,
+            clahe=True,
+            window_width=350,
+            window_level=45,
+        )
+        assert img.shape == (128, 128, 3)
+        assert img.dtype == np.float32
+

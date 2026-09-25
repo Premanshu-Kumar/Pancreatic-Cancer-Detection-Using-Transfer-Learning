@@ -21,11 +21,101 @@ sys.path.append(str(Path(__file__).resolve().parent.parent.parent))
 import config
 
 
+def apply_pancreatic_window(
+    image: np.ndarray,
+    window_width: int = 350,
+    window_level: int = 45,
+) -> np.ndarray:
+    """
+    Apply pancreatic CT soft-tissue Hounsfield Unit (HU) windowing.
+    Standard pancreas window: Window Level (L) = 45 HU, Window Width (W) = 350 HU.
+    Window bounds: [L - W/2, L + W/2] -> [-130, 220] HU.
+
+    Parameters
+    ----------
+    image : np.ndarray
+        Input CT image as floating point or uint8 array.
+    window_width : int
+        Window width (W), defaults to 350.
+    window_level : int
+        Window center/level (L), defaults to 45.
+
+    Returns
+    -------
+    np.ndarray
+        Windowed image normalized to [0.0, 1.0] range.
+    """
+    img = image.astype(np.float32)
+    win_min = window_level - (window_width / 2.0)
+    win_max = window_level + (window_width / 2.0)
+
+    # Clip to window bounds
+    img_windowed = np.clip(img, win_min, win_max)
+    # Rescale to [0, 1]
+    if win_max > win_min:
+        img_windowed = (img_windowed - win_min) / (win_max - win_min)
+    else:
+        img_windowed = np.zeros_like(img_windowed)
+    return img_windowed
+
+
+def apply_clahe(
+    image: np.ndarray,
+    clip_limit: float = 2.0,
+    tile_grid_size: Tuple[int, int] = (8, 8),
+) -> np.ndarray:
+    """
+    Apply Contrast Limited Adaptive Histogram Equalization (CLAHE) to enhance
+    contrast in subtle pancreatic lesions.
+
+    Parameters
+    ----------
+    image : np.ndarray
+        Input image (float [0, 1] or uint8 [0, 255]).
+    clip_limit : float
+        Threshold for contrast limiting. Defaults to 2.0.
+    tile_grid_size : tuple of int
+        Size of grid for histogram equalization. Defaults to (8, 8).
+
+    Returns
+    -------
+    np.ndarray
+        Contrast-enhanced image in the same value range and format as input.
+    """
+    is_float = np.issubdtype(image.dtype, np.floating) or image.max() <= 1.0
+    if is_float:
+        img_uint8 = np.clip(image * 255.0, 0, 255).astype(np.uint8)
+    else:
+        img_uint8 = np.clip(image, 0, 255).astype(np.uint8)
+
+    clahe = cv2.createCLAHE(clipLimit=clip_limit, tileGridSize=tile_grid_size)
+
+    if len(img_uint8.shape) == 2:
+        enhanced = clahe.apply(img_uint8)
+    elif img_uint8.shape[2] == 1:
+        enhanced = clahe.apply(img_uint8[:, :, 0])[:, :, np.newaxis]
+    else:
+        # Convert to LAB color space, apply CLAHE to L-channel
+        lab = cv2.cvtColor(img_uint8, cv2.COLOR_RGB2LAB)
+        l, a, b = cv2.split(lab)
+        l_clahe = clahe.apply(l)
+        enhanced_lab = cv2.merge((l_clahe, a, b))
+        enhanced = cv2.cvtColor(enhanced_lab, cv2.COLOR_LAB2RGB)
+
+    if is_float:
+        return enhanced.astype(np.float32) / 255.0
+    return enhanced
+
+
 def preprocess_image(
     image_path: str,
     target_size: Tuple[int, int] = None,
     normalize: bool = True,
     denoise: bool = False,
+    window: bool = False,
+    clahe: bool = False,
+    window_width: int = 350,
+    window_level: int = 45,
     as_array: bool = True,
 ) -> np.ndarray:
     """
@@ -41,6 +131,14 @@ def preprocess_image(
         If True, scale pixel values to [0, 1].
     denoise : bool
         If True, apply Gaussian blur for noise reduction.
+    window : bool
+        If True, apply pancreatic CT HU windowing.
+    clahe : bool
+        If True, apply CLAHE adaptive contrast enhancement.
+    window_width : int
+        Window width for CT windowing (defaults to 350).
+    window_level : int
+        Window level for CT windowing (defaults to 45).
     as_array : bool
         If True, return a NumPy array. Otherwise, return a PIL Image.
 
@@ -60,6 +158,14 @@ def preprocess_image(
     # Convert BGR to RGB
     img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
 
+    # Optional CT Windowing
+    if window:
+        img = (apply_pancreatic_window(img, window_width, window_level) * 255.0).astype(np.uint8)
+
+    # Optional CLAHE contrast enhancement
+    if clahe:
+        img = apply_clahe(img)
+
     # Noise reduction
     if denoise:
         img = cv2.GaussianBlur(img, (5, 5), 0)
@@ -69,11 +175,13 @@ def preprocess_image(
 
     if as_array:
         img = img.astype(np.float32)
-        if normalize:
+        if normalize and not window:
+            img = img / 255.0
+        elif window:
             img = img / 255.0
         return img
     else:
-        return Image.fromarray(img)
+        return Image.fromarray(img if not np.issubdtype(img.dtype, np.floating) else (img * 255).astype(np.uint8))
 
 
 def preprocess_directory(
