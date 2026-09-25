@@ -33,105 +33,134 @@
     </a>
 </section>
 
-<!-- Diagnostic Workbench / Upload Section -->
-<div class="upload-section" id="workspace">
-    <form id="prediction-form" action="/predict" method="post" enctype="multipart/form-data">
-        <!-- Upload Card -->
-        <div class="glass-card upload-card">
-            <div class="card-header">
-                <div class="card-icon">📤</div>
-                <h3>Upload Medical Image</h3>
-            </div>
-
-            <div class="drop-zone" id="drop-zone">
-                <div class="drop-zone-content" id="drop-zone-content">
-                    <div class="drop-icon">
-                        <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M32 44V20M32 20l-8 8M32 20l8 8" stroke="url(#uploadGrad)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-                            <path d="M12 40v8a4 4 0 004 4h32a4 4 0 004-4v-8" stroke="url(#uploadGrad)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-                            <defs>
-                                <linearGradient id="uploadGrad" x1="12" y1="20" x2="52" y2="52">
-                                    <stop offset="0%" stop-color="#6c5ce7"/>
-                                    <stop offset="100%" stop-color="#00cec9"/>
-                                </linearGradient>
-                            </defs>
-                        </svg>
-                    </div>
-                    <p class="drop-text">Drag & drop your image here</p>
-                    <p class="drop-subtext">or click to browse</p>
-                    <p class="drop-formats">Supports: JPG, PNG, BMP, TIFF</p>
-                </div>
-                <div class="image-preview" id="image-preview" style="display: none;">
-                    <img id="preview-img" src="" alt="Preview">
-                    <button type="button" class="remove-btn" id="remove-btn" title="Remove image">✕</button>
-                </div>
-                <input type="file" name="file" id="file-input" accept=".jpg,.jpeg,.png,.bmp,.tiff,.tif" required hidden>
-            </div>
-            <p class="file-name" id="file-name"></p>
+<!-- Diagnostic Workbench / PACS Dark Workstation Section -->
+<div class="upload-section pacs-workstation" id="workspace">
+    <div class="pacs-workstation-header">
+        <div class="pacs-status-badge">
+            <span class="pulse-indicator"></span>
+            <span>PACS CLINICAL WORKSTATION · ACTIVE</span>
         </div>
+        <h2 class="pacs-heading">Diagnostic Review & Explainable AI</h2>
+        <p class="pacs-subheading">High-throughput abdominal CT inference with continuous Grad-CAM++ layer blending.</p>
+    </div>
 
-        <!-- Settings Card -->
-        <div class="glass-card settings-card">
-            <div class="card-header">
-                <div class="card-icon">⚙️</div>
-                <h3>Analysis Settings</h3>
-            </div>
+    <form id="prediction-form" action="/predict" method="post" enctype="multipart/form-data" class="pacs-dual-pane">
+        <!-- Left Pane: Clinical Controls & Input -->
+        <div class="pacs-control-panel glass-card">
+            <div class="panel-section">
+                <div class="card-header">
+                    <div class="card-icon">🎛️</div>
+                    <h3>Acquisition & Slices</h3>
+                </div>
 
-            <div class="settings-grid">
-                <!-- Model Selection -->
-                <div class="setting-group">
-                    <label class="setting-label">Select Model</label>
-                    <div class="model-selector">
-                        {% if has_models %}
-                            {% for model in available_models %}
-                            <label class="model-option {% if loop.first %}selected{% endif %}">
-                                <input type="radio" name="model_name" value="{{ model }}"
-                                       {% if loop.first %}checked{% endif %}>
-                                <div class="model-card">
-                                    <span class="model-badge model-{{ model }}">
-                                        {% if model == 'vgg16' %}VGG16
-                                        {% elif model == 'resnet50' %}ResNet50
-                                        {% elif model == 'inceptionv3' %}InceptionV3
-                                        {% endif %}
-                                    </span>
-                                    <span class="model-size">
-                                        {% if model == 'vgg16' %}224×224
-                                        {% elif model == 'resnet50' %}224×224
-                                        {% elif model == 'inceptionv3' %}299×299
-                                        {% endif %}
-                                    </span>
-                                </div>
-                            </label>
-                            {% endfor %}
-                        {% else %}
-                            <div class="no-models-notice">
-                                <p>⚠️ No trained models found.</p>
-                                <p class="notice-small">Train a model first using the notebooks or CLI.</p>
-                            </div>
-                        {% endif %}
+                <div class="drop-zone" id="drop-zone">
+                    <div class="drop-zone-content" id="drop-zone-content">
+                        <div class="drop-icon">
+                            <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M32 44V20M32 20l-8 8M32 20l8 8" stroke="url(#uploadGrad)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M12 40v8a4 4 0 004 4h32a4 4 0 004-4v-8" stroke="url(#uploadGrad)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                <defs>
+                                    <linearGradient id="uploadGrad" x1="12" y1="20" x2="52" y2="52">
+                                        <stop offset="0%" stop-color="#8b5cf6"/>
+                                        <stop offset="100%" stop-color="#06b6d4"/>
+                                    </linearGradient>
+                                </defs>
+                            </svg>
+                        </div>
+                        <p class="drop-text">Drop Abdominal CT Series / Slice</p>
+                        <p class="drop-subtext">DICOM, PNG, JPG, or TIFF accepted</p>
                     </div>
+                    <div class="image-preview" id="image-preview" style="display: none;">
+                        <img id="preview-img" src="" alt="Preview">
+                        <button type="button" class="remove-btn" id="remove-btn" title="Remove image">✕</button>
+                    </div>
+                    <input type="file" name="file" id="file-input" accept=".jpg,.jpeg,.png,.bmp,.tiff,.tif,.dcm" required hidden>
                 </div>
+                <p class="file-name" id="file-name"></p>
+            </div>
 
-                <!-- Grad-CAM Toggle -->
-                <div class="setting-group">
-                    <label class="setting-label">Explainability</label>
-                    <label class="toggle-switch">
-                        <input type="checkbox" name="generate_gradcam" value="true" id="gradcam-toggle">
-                        <span class="toggle-slider"></span>
-                        <span class="toggle-label">Generate Grad-CAM Heatmap</span>
-                    </label>
-                    <p class="setting-hint">Visualize which regions influenced the prediction</p>
+            <!-- Model Backbone Selection -->
+            <div class="panel-section">
+                <label class="setting-label">Transfer Learning Vision Backbone</label>
+                <div class="model-selector">
+                    {% if has_models %}
+                        {% for model in available_models %}
+                        <label class="model-option {% if loop.first %}selected{% endif %}">
+                            <input type="radio" name="model_name" value="{{ model }}" {% if loop.first %}checked{% endif %}>
+                            <div class="model-card">
+                                <span class="model-badge model-{{ model }}">
+                                    {{ model|upper }}
+                                </span>
+                                <span class="model-size">
+                                    {% if model in ['vgg16', 'resnet50', 'convnext'] %}224×224
+                                    {% elif model == 'inceptionv3' %}299×299
+                                    {% elif model in ['efficientnet', 'efficientnetv2'] %}260×260
+                                    {% else %}224×224{% endif %}
+                                </span>
+                            </div>
+                        </label>
+                        {% endfor %}
+                    {% else %}
+                        <div class="no-models-notice">
+                            <p>⚠️ No preloaded model weights found. System will fallback to baseline inference.</p>
+                        </div>
+                    {% endif %}
                 </div>
             </div>
 
-            <!-- Submit Button -->
-            <button type="submit" class="analyze-btn" id="analyze-btn" {% if not has_models %}disabled{% endif %}>
-                <span class="btn-text">Analyze Image</span>
+            <!-- Explainability & Overlays -->
+            <div class="panel-section">
+                <label class="setting-label">Explainability Mode</label>
+                <label class="toggle-switch">
+                    <input type="checkbox" name="generate_gradcam" value="true" id="gradcam-toggle" checked>
+                    <span class="toggle-slider"></span>
+                    <span class="toggle-label">Enable Grad-CAM++ Multi-Focal Localization</span>
+                </label>
+            </div>
+
+            <button type="submit" class="analyze-btn pacs-run-btn" id="analyze-btn">
+                <span class="btn-text">Execute AI Classification</span>
                 <span class="btn-loader" id="btn-loader" style="display: none;">
                     <span class="spinner"></span>
-                    Analyzing...
+                    Running Inference...
                 </span>
             </button>
+        </div>
+
+        <!-- Right Pane: PACS Radiologist Viewing Canvas & Heatmap Opacity Slider -->
+        <div class="pacs-viewer-panel glass-card">
+            <div class="pacs-viewer-toolbar">
+                <div class="toolbar-title">
+                    <span class="toolbar-dot"></span>
+                    <span>REAL-TIME PACS OVERLAY VIEWER</span>
+                </div>
+                <div class="toolbar-controls">
+                    <span class="hu-preset-pill">HU Pancreas: W:350 L:45</span>
+                </div>
+            </div>
+
+            <div class="pacs-canvas-wrapper" id="pacs-canvas-wrapper">
+                <div class="pacs-viewport" id="pacs-viewport">
+                    <!-- Layer 1: Base CT Slice -->
+                    <img id="pacs-base-slice" src="/static/images/hero-ct-preview.png" alt="CT Slice" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'400\' height=\'400\' viewBox=\'0 0 400 400\'><rect width=\'400\' height=\'400\' fill=\'%23111424\'/><text x=\'50%25\' y=\'50%25\' fill=\'%238b5cf6\' font-family=\'sans-serif\' font-size=\'16\' text-anchor=\'middle\'>Ready for Scan Upload</text></svg>'">
+                    <!-- Layer 2: Grad-CAM++ Heatmap Overlay with Dynamic Opacity -->
+                    <div id="pacs-heatmap-overlay" class="pacs-heatmap-layer" style="opacity: 0.65;"></div>
+                </div>
+                <div class="pacs-canvas-grid-lines"></div>
+            </div>
+
+            <!-- Heatmap Opacity Slider Bar -->
+            <div class="pacs-slider-container">
+                <div class="slider-header-row">
+                    <span class="slider-title">Grad-CAM++ Overlay Opacity</span>
+                    <span class="slider-value-readout" id="opacity-readout">65%</span>
+                </div>
+                <div class="slider-track-wrap">
+                    <span class="slider-tag">Anatomy (0%)</span>
+                    <input type="range" id="heatmap-opacity-slider" min="0" max="100" value="65" class="pacs-range-slider">
+                    <span class="slider-tag">Heatmap (100%)</span>
+                </div>
+            </div>
         </div>
     </form>
 </div>

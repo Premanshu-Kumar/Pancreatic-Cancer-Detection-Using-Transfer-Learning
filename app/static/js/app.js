@@ -89,8 +89,27 @@ document.addEventListener('DOMContentLoaded', function () {
             imagePreview.style.display = 'flex';
             fileName.textContent = file.name;
             fileName.style.color = '#00cec9';
+
+            // Also update PACS base slice in right viewing panel
+            const pacsBase = document.getElementById('pacs-base-slice');
+            if (pacsBase) {
+                pacsBase.src = e.target.result;
+            }
         };
         reader.readAsDataURL(file);
+    }
+
+    // ─── PACS Opacity Slider ────────────────────────────────────────────
+    const opacitySlider = document.getElementById('heatmap-opacity-slider');
+    const opacityReadout = document.getElementById('opacity-readout');
+    const heatmapOverlay = document.getElementById('pacs-heatmap-overlay');
+
+    if (opacitySlider && heatmapOverlay) {
+        opacitySlider.addEventListener('input', function () {
+            const val = this.value;
+            if (opacityReadout) opacityReadout.textContent = `${val}%`;
+            heatmapOverlay.style.opacity = (val / 100).toString();
+        });
     }
 
     // ─── Remove Image ───────────────────────────────────────────────────
