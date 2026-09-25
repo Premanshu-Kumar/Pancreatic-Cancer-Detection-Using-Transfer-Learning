@@ -10,7 +10,7 @@ import uuid
 import base64
 import io
 from pathlib import Path
-from typing import Optional
+from typing import Optional, List
 
 import cv2
 import numpy as np
@@ -20,7 +20,7 @@ from fastapi import APIRouter, UploadFile, File, Form, HTTPException, Request
 import sys
 sys.path.append(str(Path(__file__).resolve().parent.parent.parent))
 import config
-from app.schemas import PredictionResponse, BoundingBox
+from app.schemas import PredictionResponse, BoundingBox, BatchPredictionResponse, BatchPredictionItem
 from src.data.preprocessing import preprocess_image
 from src.utils.gradcam import GradCAMPlusPlus, extract_lesion_bounding_boxes
 
@@ -122,3 +122,69 @@ async def api_predict_image(
         bounding_boxes=bounding_boxes,
         heatmap_base64=heatmap_b64,
     )
+
+
+@router.post("/batch", response_model=BatchPredictionResponse)
+async def api_predict_batch(
+    files: List[UploadFile] = File(..., description="CT sequence slices to batch analyze"),
+    model_name: str = Form(default="resnet50"),
+    optimal_threshold: float = Form(default=0.50),
+):
+    """
+    Analyze full CT series slices and rank them by anomaly suspicion score.
+    """
+    batch_id = str(uuid.uuid4())
+    model = _get_model(model_name)
+    target_size = model.img_size
+
+    slice_results = []
+    cancerous_count = 0
+    normal_count = 0
+
+    for idx, f in enumerate(files):
+        content = await f.read()
+        if not content:
+            continue
+        try:
+            pil_img = Image.open(io.BytesIO(content)).convert("RGB")
+            raw_arr = np.array(pil_img)
+            img_resized = cv2.resize(raw_arr, target_size, interpolation=cv2.INTER_LANCZOS4).astype(np.float32) / 255.0
+            input_tensor = np.expand_dims(img_resized, axis=0)
+            prob = float(model.predict(input_tensor)[0])
+            is_cancer = prob >= optimal_threshold
+            conf = prob if is_cancer else (1.0 - prob)
+
+            if is_cancer:
+                cancerous_count += 1
+            else:
+                normal_count += 1
+
+            slice_results.append({
+                "slice_index": idx + 1,
+                "filename": f.filename or f"slice_{idx+1}.png",
+                "class_name": "Cancerous" if is_cancer else "Normal",
+                "is_cancerous": is_cancer,
+                "probability": round(prob, 4),
+                "confidence": round(conf, 4),
+            })
+        except Exception:
+            continue
+
+    # Sort descending by cancer probability for triage ranking
+    slice_results.sort(key=lambda s: s["probability"], reverse=True)
+    for rank, item in enumerate(slice_results, 1):
+        item["anomaly_rank"] = rank
+
+    highest_prob = slice_results[0]["probability"] if slice_results else 0.0
+    top_slice = slice_results[0]["filename"] if slice_results else None
+
+    return BatchPredictionResponse(
+        batch_id=batch_id,
+        total_slices=len(slice_results),
+        cancerous_count=cancerous_count,
+        normal_count=normal_count,
+        highest_probability=round(highest_prob, 4),
+        top_suspicious_slice=top_slice,
+        slices=[BatchPredictionItem(**item) for item in slice_results],
+    )
+

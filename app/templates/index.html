@@ -163,6 +163,32 @@
             </div>
         </div>
     </form>
+
+    <!-- Multi-Slice CT Batch Analysis Section (Day 24) -->
+    <div class="batch-series-section glass-card" style="margin-top: 36px; padding: 28px;">
+        <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <div class="card-icon">📚</div>
+                <div>
+                    <h3 style="margin: 0; font-size: 1.25rem; color: #ffffff;">Multi-Slice CT Series Anomaly Triage</h3>
+                    <p style="margin: 4px 0 0; font-size: 0.85rem; color: #a78bfa;">Batch process whole-organ volumetric slices with automated malignancy probability ranking.</p>
+                </div>
+            </div>
+            <span class="hu-preset-pill">API Endpoint: /api/predict/batch</span>
+        </div>
+
+        <div class="batch-upload-dropzone" style="border: 2px dashed rgba(139, 92, 246, 0.4); border-radius: 12px; padding: 30px; text-align: center; background: rgba(15, 23, 42, 0.5);">
+            <p style="color: #e2e8f0; font-weight: 600; margin-bottom: 6px;">Select or Drop Full Patient CT Series (Multiple Slices)</p>
+            <p style="color: #94a3b8; font-size: 0.85rem; margin-bottom: 16px;">Slices will be evaluated asynchronously and ordered by highest suspicion score.</p>
+            <input type="file" id="batch-file-input" multiple accept=".png,.jpg,.jpeg,.dcm" style="display: none;">
+            <button type="button" class="action-btn-primary-light" style="padding: 10px 22px; cursor: pointer;" onclick="document.getElementById('batch-file-input').click();">
+                Browse CT Slice Series
+            </button>
+            <span id="batch-files-count" style="margin-left: 14px; color: #38bdf8; font-weight: 600; font-size: 0.9rem;"></span>
+        </div>
+
+        <div id="batch-results-gallery" class="batch-gallery-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; margin-top: 24px;"></div>
+    </div>
 </div>
 
 <!-- Features Section -->
