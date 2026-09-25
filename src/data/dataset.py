@@ -9,8 +9,10 @@ import os
 from pathlib import Path
 from typing import Tuple, Optional, Dict, Any, List
 
+import csv
 import numpy as np
 from PIL import Image
+import tensorflow as tf
 
 import sys
 sys.path.append(str(Path(__file__).resolve().parent.parent.parent))
@@ -253,3 +255,102 @@ def get_sample_images(
         samples[class_dir.name] = class_samples
 
     return samples
+
+
+def parse_and_preprocess_image(
+    file_path: tf.Tensor,
+    label: tf.Tensor,
+    target_size: Tuple[int, int] = (224, 224),
+    normalize: bool = True,
+) -> Tuple[tf.Tensor, tf.Tensor]:
+    """Read image file, decode PNG/JPEG, resize, and normalize using pure TensorFlow ops."""
+    img_bytes = tf.io.read_file(file_path)
+    img = tf.io.decode_image(img_bytes, channels=3, expand_animations=False)
+    img = tf.image.resize(img, target_size)
+    if normalize:
+        img = tf.cast(img, tf.float32) / 255.0
+    return img, label
+
+
+def create_tf_dataset_from_manifest(
+    manifest_csv: str,
+    target_size: Tuple[int, int] = (224, 224),
+    batch_size: int = 32,
+    is_training: bool = True,
+    shuffle_buffer: int = 1000,
+) -> tf.data.Dataset:
+    """
+    Create a high-throughput tf.data.Dataset from a CSV manifest.
+    Utilizes AUTOTUNE parallel calls, caching, and prefetching to eliminate I/O bottlenecks.
+    """
+    file_paths = []
+    labels = []
+
+    with open(manifest_csv, mode="r", encoding="utf-8") as f:
+        reader = csv.DictReader(f)
+        for row in reader:
+            file_paths.append(row["filepath"])
+            labels.append(float(row["label"]))
+
+    if not file_paths:
+        raise ValueError(f"No records found in manifest: {manifest_csv}")
+
+    dataset = tf.data.Dataset.from_tensor_slices((file_paths, labels))
+
+    if is_training:
+        dataset = dataset.shuffle(buffer_size=min(len(file_paths), shuffle_buffer))
+
+    # Parallel mapping with AUTOTUNE
+    dataset = dataset.map(
+        lambda path, lbl: parse_and_preprocess_image(path, lbl, target_size=target_size),
+        num_parallel_calls=tf.data.AUTOTUNE,
+    )
+
+    dataset = dataset.batch(batch_size)
+    dataset = dataset.prefetch(buffer_size=tf.data.AUTOTUNE)
+    return dataset
+
+
+def create_tf_data_pipeline(
+    data_dir: Optional[str] = None,
+    target_size: Tuple[int, int] = None,
+    batch_size: int = None,
+) -> Dict[str, tf.data.Dataset]:
+    """
+    Create high-throughput tf.data pipelines for train, validation, and test splits.
+    Defaults to patient manifests in data/splits/ if available.
+    """
+    if target_size is None:
+        target_size = config.DEFAULT_IMG_SIZE
+    if batch_size is None:
+        batch_size = config.BATCH_SIZE
+
+    splits_dir = config.DATA_DIR / "splits"
+    train_csv = splits_dir / "train_manifest.csv"
+    val_csv = splits_dir / "val_manifest.csv"
+    test_csv = splits_dir / "test_manifest.csv"
+
+    if train_csv.exists() and val_csv.exists() and test_csv.exists():
+        return {
+            "train": create_tf_dataset_from_manifest(str(train_csv), target_size, batch_size, is_training=True),
+            "val": create_tf_dataset_from_manifest(str(val_csv), target_size, batch_size, is_training=False),
+            "test": create_tf_dataset_from_manifest(str(test_csv), target_size, batch_size, is_training=False),
+        }
+
+    # Fallback to tf.keras.utils.image_dataset_from_directory with prefetching
+    base_path = Path(data_dir) if data_dir else config.PROCESSED_DATA_DIR
+    datasets = {}
+    for split in ["train", "val", "test"]:
+        sdir = base_path / split
+        if sdir.exists():
+            ds = tf.keras.utils.image_dataset_from_directory(
+                str(sdir),
+                image_size=target_size,
+                batch_size=batch_size,
+                label_mode="binary",
+                shuffle=(split == "train"),
+            )
+            ds = ds.prefetch(buffer_size=tf.data.AUTOTUNE)
+            datasets[split] = ds
+    return datasets
+
