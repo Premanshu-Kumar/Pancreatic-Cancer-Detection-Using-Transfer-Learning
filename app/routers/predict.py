@@ -21,6 +21,7 @@ import sys
 sys.path.append(str(Path(__file__).resolve().parent.parent.parent))
 import config
 from app.schemas import PredictionResponse, BoundingBox, BatchPredictionResponse, BatchPredictionItem
+from app.security import validate_image_payload
 from src.data.preprocessing import preprocess_image
 from src.utils.gradcam import GradCAMPlusPlus, extract_lesion_bounding_boxes
 
@@ -60,10 +61,9 @@ async def api_predict_image(
     start_time = time.perf_counter()
     pred_id = str(uuid.uuid4())
 
-    # Read image contents
+    # Read and security-validate image payload
     contents = await file.read()
-    if not contents:
-        raise HTTPException(status_code=400, detail="Uploaded file is empty.")
+    clean_filename = validate_image_payload(contents, filename=file.filename)
 
     try:
         pil_img = Image.open(io.BytesIO(contents)).convert("RGB")
@@ -143,9 +143,8 @@ async def api_predict_batch(
 
     for idx, f in enumerate(files):
         content = await f.read()
-        if not content:
-            continue
         try:
+            clean_name = validate_image_payload(content, filename=f.filename)
             pil_img = Image.open(io.BytesIO(content)).convert("RGB")
             raw_arr = np.array(pil_img)
             img_resized = cv2.resize(raw_arr, target_size, interpolation=cv2.INTER_LANCZOS4).astype(np.float32) / 255.0
