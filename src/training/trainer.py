@@ -23,6 +23,7 @@ import config
 from src.models.model_factory import ModelFactory
 from src.data.dataset import create_generators
 from src.training.callbacks import get_callbacks, TrainingProgressCallback
+from src.training.losses import get_loss_function
 
 
 class Trainer:
@@ -44,6 +45,7 @@ class Trainer:
         epochs_phase2: int = None,
         lr_phase1: float = None,
         lr_phase2: float = None,
+        loss_type: str = "binary_crossentropy",
     ):
         """
         Initialize the Trainer.
@@ -51,13 +53,15 @@ class Trainer:
         Parameters
         ----------
         model_name : str
-            One of 'vgg16', 'resnet50', 'inceptionv3'.
+            One of 'vgg16', 'resnet50', 'inceptionv3', 'efficientnetv2', 'convnext'.
         batch_size : int
             Training batch size.
         epochs_phase1, epochs_phase2 : int
             Number of epochs for each training phase.
         lr_phase1, lr_phase2 : float
             Learning rates for each phase.
+        loss_type : str
+            Loss function ('binary_crossentropy' or 'focal').
         """
         self.model_name = model_name or config.DEFAULT_MODEL
         self.batch_size = batch_size or config.BATCH_SIZE
@@ -65,13 +69,33 @@ class Trainer:
         self.epochs_phase2 = epochs_phase2 or config.EPOCHS_PHASE2
         self.lr_phase1 = lr_phase1 or config.LEARNING_RATE_PHASE1
         self.lr_phase2 = lr_phase2 or config.LEARNING_RATE_PHASE2
+        self.loss_type = loss_type
 
         self.model_instance = None
         self.train_gen = None
         self.val_gen = None
         self.test_gen = None
+        self.class_weights = None
         self.history_phase1 = None
         self.history_phase2 = None
+
+    def compute_class_weights(self) -> Optional[Dict[int, float]]:
+        """
+        Compute inverse class frequency weights:
+            w_c = total_samples / (num_classes * count_c)
+        """
+        try:
+            if hasattr(self.train_gen, "classes") and self.train_gen.classes is not None:
+                labels = np.array(self.train_gen.classes)
+                unique, counts = np.unique(labels, return_counts=True)
+                total = len(labels)
+                n_classes = len(unique)
+                weights = {int(cls): float(total / (n_classes * count)) for cls, count in zip(unique, counts)}
+                print(f"  ✓ Computed Class Frequency Weights: {weights}")
+                return weights
+        except Exception as e:
+            print(f"  ⚠ Could not compute class weights automatically: {e}")
+        return None
 
     def setup(self) -> None:
         """Build and compile the model, create data generators."""
@@ -97,6 +121,19 @@ class Trainer:
         print(f"    Val samples:   {self.val_gen.samples}")
         print(f"    Test samples:  {self.test_gen.samples}")
         print(f"    Class indices: {self.train_gen.class_indices}")
+
+        # Compute class weights for handling medical imbalance
+        self.class_weights = self.compute_class_weights()
+
+        # Recompile with focal loss if specified
+        if "focal" in self.loss_type.lower():
+            focal_loss = get_loss_function(self.loss_type)
+            self.model_instance.model.compile(
+                optimizer=self.model_instance.optimizer,
+                loss=focal_loss,
+                metrics=["accuracy"],
+            )
+            print(f"  ✓ Configured Binary Focal Loss for rare lesion compensation")
 
     def train_phase1(self) -> dict:
         """
@@ -127,6 +164,7 @@ class Trainer:
             epochs=self.epochs_phase1,
             validation_data=self.val_gen,
             callbacks=callbacks,
+            class_weight=self.class_weights,
             verbose=0,  # We use our custom callback
         )
         elapsed = time.time() - start
@@ -166,6 +204,7 @@ class Trainer:
             epochs=self.epochs_phase2,
             validation_data=self.val_gen,
             callbacks=callbacks,
+            class_weight=self.class_weights,
             verbose=0,
         )
         elapsed = time.time() - start
