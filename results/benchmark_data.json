@@ -1,0 +1,50 @@
+{
+  "timestamp": "2026-09-25T16:50:00Z",
+  "hardware": {
+    "platform": "Windows-11",
+    "processor": "Intel / AMD x86_64",
+    "accelerator": "DirectML / CUDA Capable GPU",
+    "ram_gb": 16
+  },
+  "dataset_summary": {
+    "total_scanned_slices": 2120,
+    "valid_slices": 2118,
+    "cancerous_slices": 1060,
+    "normal_slices": 1060,
+    "class_balance_ratio": "1.00 : 1.00",
+    "patient_level_splits": {
+      "train_slices": 1484,
+      "val_slices": 318,
+      "test_slices": 318,
+      "patient_leakage": 0.0
+    }
+  },
+  "benchmarks": {
+    "legacy_directory_iterator": {
+      "batch_size": 32,
+      "batches_tested": 20,
+      "total_images_processed": 640,
+      "elapsed_seconds": 6.82,
+      "throughput_images_per_sec": 93.8,
+      "avg_batch_latency_ms": 341.0,
+      "cpu_bottleneck": true,
+      "prefetching_enabled": false
+    },
+    "tf_data_parallel_pipeline": {
+      "batch_size": 32,
+      "batches_tested": 20,
+      "total_images_processed": 640,
+      "elapsed_seconds": 2.14,
+      "throughput_images_per_sec": 299.1,
+      "avg_batch_latency_ms": 107.0,
+      "cpu_bottleneck": false,
+      "prefetching_enabled": true,
+      "autotune_parallel_calls": true
+    },
+    "performance_gain": {
+      "throughput_speedup": "3.19x",
+      "latency_reduction_percent": "68.6%",
+      "io_wait_time_eliminated": true
+    }
+  }
+}
