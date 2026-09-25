@@ -16,12 +16,14 @@ class TestModelFactory:
     """Tests for ModelFactory."""
 
     def test_list_models(self):
-        """Test that all three models are registered."""
+        """Test that all models are registered."""
         models = ModelFactory.list_models()
         assert "vgg16" in models
         assert "resnet50" in models
         assert "inceptionv3" in models
-        assert len(models) == 3
+        assert "efficientnetv2" in models
+        assert "convnext" in models
+        assert len(models) >= 5
 
     def test_create_valid_model(self):
         """Test creating a model by name."""
@@ -38,7 +40,7 @@ class TestModelFactory:
     def test_create_all(self):
         """Test creating all models at once."""
         all_models = ModelFactory.create_all()
-        assert len(all_models) == 3
+        assert len(all_models) >= 5
         for name, model in all_models.items():
             assert isinstance(model, BaseCancerModel)
 

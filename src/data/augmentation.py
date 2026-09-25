@@ -93,12 +93,12 @@ def get_augmentation_config(custom_config: Optional[Dict[str, Any]] = None) -> d
     Get the data augmentation configuration with medical-safe constraints.
     """
     aug_config = config.AUGMENTATION_CONFIG.copy()
-    # Medical safety overrides: prevent inverted anatomy
+    if custom_config:
+        aug_config.update(custom_config)
+    # Medical safety overrides: prevent inverted anatomy and excessive rotation
     aug_config["vertical_flip"] = False
     aug_config["rotation_range"] = min(aug_config.get("rotation_range", 15), 15)
     aug_config["zoom_range"] = min(aug_config.get("zoom_range", 0.1), 0.1)
-    if custom_config:
-        aug_config.update(custom_config)
     return aug_config
 
 

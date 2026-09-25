@@ -90,3 +90,53 @@ class TestMetrics:
         assert "Normal" in report
         assert "Cancerous" in report
         assert "accuracy" in report
+
+
+class TestFastAPIEndpoints:
+    """Test suite for FastAPI REST API endpoints."""
+
+    @pytest.fixture
+    def client(self):
+        from fastapi.testclient import TestClient
+        from app.main import app
+        return TestClient(app)
+
+    def test_api_health_endpoint(self, client):
+        """Verify /api/health returns 200 and schema compliant response."""
+        res = client.get("/api/health")
+        assert res.status_code == 200
+        data = res.json()
+        assert data["status"] == "healthy"
+        assert data["version"] == "2.0.0"
+        assert "timestamp" in data
+
+    def test_api_models_endpoint(self, client):
+        """Verify /api/models lists all registered backbones."""
+        res = client.get("/api/models")
+        assert res.status_code == 200
+        data = res.json()
+        assert "models" in data
+        assert data["total_models"] >= 5
+
+
+class TestSecuritySanitization:
+    """Test suite for payload magic-byte checks and upload sanitization."""
+
+    def test_magic_byte_png_valid(self):
+        from app.security import verify_magic_bytes
+        png_header = b"\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR"
+        assert verify_magic_bytes(png_header) is True
+
+    def test_magic_byte_malicious_script_rejected(self):
+        from app.security import verify_magic_bytes
+        script_header = b"#!/bin/bash\necho 'hacked'"
+        assert verify_magic_bytes(script_header) is False
+
+    def test_filename_sanitization_path_traversal(self):
+        from app.security import sanitize_filename
+        dirty = "../../etc/passwd.png"
+        cleaned = sanitize_filename(dirty)
+        assert ".." not in cleaned
+        assert "/" not in cleaned
+        assert "\\" not in cleaned
+
