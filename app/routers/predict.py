@@ -29,22 +29,17 @@ router = APIRouter(prefix="/api/predict", tags=["prediction"])
 
 
 def _get_model(model_name: str):
-    """Retrieve model instance from global cache or load from disk."""
-    from app.main import _loaded_models
-    from app.main import load_model_if_available
+    """Retrieve model instance from global cache or load from disk on-demand."""
+    from app.main import get_model
 
     name = model_name.lower().strip()
-    if name in _loaded_models:
-        return _loaded_models[name]
-
-    model = load_model_if_available(name)
+    model = get_model(name)
     if model:
-        _loaded_models[name] = model
         return model
 
     raise HTTPException(
         status_code=404,
-        detail=f"Model '{model_name}' is not loaded and weights were not found. Please train model first."
+        detail=f"Model '{model_name}' weights not found. Please train model first."
     )
 
 

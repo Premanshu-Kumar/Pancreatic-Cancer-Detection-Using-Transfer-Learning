@@ -23,5 +23,9 @@ services:
         value: 1
       - key: TF_ENABLE_ONEDNN_OPTS
         value: 0
+      - key: TF_CPP_MIN_LOG_LEVEL
+        value: 3
+      - key: MALLOC_TRIM_THRESHOLD_
+        value: 100000
       - key: MAX_UPLOAD_SIZE_MB
         value: 10

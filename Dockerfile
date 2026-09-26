@@ -39,7 +39,10 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     PATH="/opt/venv/bin:$PATH" \
     PORT=8000 \
-    APP_HOST=0.0.0.0
+    APP_HOST=0.0.0.0 \
+    MALLOC_TRIM_THRESHOLD_=100000 \
+    TF_CPP_MIN_LOG_LEVEL=3 \
+    TF_ENABLE_ONEDNN_OPTS=0
 
 # Install runtime dependencies required by OpenCV and ReportLab
 RUN apt-get update && apt-get install -y --no-install-recommends \

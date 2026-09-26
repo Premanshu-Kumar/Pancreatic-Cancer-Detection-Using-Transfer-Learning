@@ -50,29 +50,53 @@ def load_model_if_available(model_name: str):
     return None
 
 
+def get_model(model_name: str):
+    """Retrieve model instance from global cache or load from disk on-demand."""
+    name = model_name.lower().strip()
+    if name in _loaded_models:
+        return _loaded_models[name]
+
+    # Free memory if another model is already loaded (keeps RAM under 512MB on Render Free Tier)
+    if _loaded_models:
+        _loaded_models.clear()
+        import gc
+        gc.collect()
+
+    model = load_model_if_available(name)
+    if model:
+        _loaded_models[name] = model
+        return model
+    return None
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    """Load models on startup, cleanup on shutdown."""
+    """Fast, low-memory startup with on-demand model loading."""
     print("\n🔬 Cancer Detection System — Starting up...")
 
+    available_checkpoints = []
     for name in ModelFactory.list_models():
-        model = load_model_if_available(name)
-        if model:
-            _loaded_models[name] = model
-            print(f"  ✓ Loaded: {name}")
+        model_path = config.MODELS_DIR / f"{name}_best.keras"
+        phase2_path = config.MODELS_DIR / f"{name}_phase2_best.keras"
+        if model_path.exists() or phase2_path.exists():
+            available_checkpoints.append(name)
+            print(f"  ✓ Model checkpoint available (on-demand): {name}")
         else:
-            print(f"  ○ Not found: {name} (train first)")
+            print(f"  ○ Checkpoint not found: {name}")
 
-    if not _loaded_models:
-        print("  ⚠ No trained models found. Train a model first.")
-        print(f"    Run: python -m src.training.trainer --model resnet50")
+    if not available_checkpoints:
+        print("  ⚠ No trained model checkpoints found. Train a model first.")
+        print("    Run: python -m src.training.trainer --model resnet50")
+    else:
+        print(f"  ✓ Ready with {len(available_checkpoints)} available model(s).")
 
     yield
 
-    # Cleanup uploads
+    # Cleanup uploads and model references on shutdown
     if UPLOAD_DIR.exists():
         shutil.rmtree(UPLOAD_DIR, ignore_errors=True)
         UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
+    _loaded_models.clear()
     print("\n🔬 Cancer Detection System — Shut down.")
 
 
@@ -145,7 +169,10 @@ async def api_health():
     return HealthResponse(
         status="healthy",
         version="2.0.0",
-        loaded_models=list(_loaded_models.keys()),
+        loaded_models=list(_loaded_models.keys()) or [
+            name for name in ModelFactory.list_models()
+            if (config.MODELS_DIR / f"{name}_best.keras").exists() or (config.MODELS_DIR / f"{name}_phase2_best.keras").exists()
+        ],
         gpu_available=has_gpu,
         timestamp=datetime.now(timezone.utc).isoformat(),
     )
@@ -166,11 +193,15 @@ async def api_models():
     for name in ModelFactory.list_models():
         cfg = config.IMAGE_CONFIGS.get(name, {})
         shape = list(cfg.get("input_shape", (224, 224, 3)))
+        has_checkpoint = (
+            (config.MODELS_DIR / f"{name}_best.keras").exists()
+            or (config.MODELS_DIR / f"{name}_phase2_best.keras").exists()
+        )
         models_meta.append(ModelInfo(
             name=name,
             display_name=name.upper(),
             input_shape=shape,
-            is_loaded=(name in _loaded_models),
+            is_loaded=(name in _loaded_models or has_checkpoint),
             description=descriptions.get(name, "Deep transfer learning medical backbone"),
         ))
     return ModelListResponse(

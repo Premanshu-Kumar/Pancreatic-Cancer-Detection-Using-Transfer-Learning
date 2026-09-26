@@ -58,21 +58,25 @@ async def predict(
     TemplateResponse
         Results page with prediction details.
     """
-    loaded_models = _get_loaded_models()
+    from app.main import get_model
+    model = get_model(model_name)
+    if not model:
+        for candidate in [config.DEFAULT_MODEL, "resnet50", "vgg16", "inceptionv3"]:
+            model = get_model(candidate)
+            if model:
+                model_name = candidate
+                break
 
     # Validate model availability
-    if model_name not in loaded_models:
-        available = list(loaded_models.keys())
-        if not available:
-            return templates.TemplateResponse(
-                "results.html",
-                {
-                    "request": request,
-                    "error": "No trained models available. Please train a model first.",
-                    "prediction": None,
-                },
-            )
-        model_name = available[0]
+    if not model:
+        return templates.TemplateResponse(
+            "results.html",
+            {
+                "request": request,
+                "error": "No trained models available. Please train a model first.",
+                "prediction": None,
+            },
+        )
 
     # Validate file type
     ext = Path(file.filename).suffix.lower()
@@ -96,7 +100,6 @@ async def predict(
         f.write(content)
 
     try:
-        model = loaded_models[model_name]
         result = model.predict(str(save_path))
 
         # Encode image to base64 for display
