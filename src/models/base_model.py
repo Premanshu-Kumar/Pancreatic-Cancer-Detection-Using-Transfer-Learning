@@ -9,6 +9,7 @@ from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import Optional, Tuple, List
 
+import cv2
 import numpy as np
 import tensorflow as tf
 from tensorflow.keras import Model, layers, optimizers
@@ -255,7 +256,7 @@ class BaseCancerModel(ABC):
 
     def predict(
         self,
-        image_path: str,
+        image_input,
         threshold: float = 0.5,
     ) -> dict:
         """
@@ -263,8 +264,8 @@ class BaseCancerModel(ABC):
 
         Parameters
         ----------
-        image_path : str
-            Path to the input image.
+        image_input : str, Path, or np.ndarray
+            Path to the input image or preprocessed image array.
         threshold : float
             Classification threshold. Above = Cancerous, Below = Normal.
 
@@ -276,11 +277,29 @@ class BaseCancerModel(ABC):
         if self.model is None:
             raise ValueError("No model loaded. Call build() or load() first.")
 
-        # Load and preprocess the image
-        img = load_img(image_path, target_size=self.img_size)
-        img_array = img_to_array(img)
-        img_array = img_array / 255.0  # Normalize
-        img_array = np.expand_dims(img_array, axis=0)  # Add batch dimension
+        # Handle numpy array vs file path
+        if isinstance(image_input, np.ndarray):
+            arr = image_input.astype(np.float32)
+            if arr.ndim == 3:
+                # Shape (H, W, C)
+                if arr.shape[:2] != self.img_size:
+                    arr = cv2.resize(arr, self.img_size, interpolation=cv2.INTER_LANCZOS4)
+                if arr.max() > 1.0:
+                    arr = arr / 255.0
+                img_array = np.expand_dims(arr, axis=0)
+            elif arr.ndim == 4:
+                # Shape (B, H, W, C)
+                if arr.max() > 1.0:
+                    arr = arr / 255.0
+                img_array = arr
+            else:
+                raise ValueError(f"Expected 3D or 4D array, got shape {arr.shape}")
+        else:
+            # Load and preprocess the image from path
+            img = load_img(str(image_input), target_size=self.img_size)
+            img_array = img_to_array(img)
+            img_array = img_array / 255.0  # Normalize
+            img_array = np.expand_dims(img_array, axis=0)  # Add batch dimension
 
         # Predict
         probability = float(self.model.predict(img_array, verbose=0)[0][0])

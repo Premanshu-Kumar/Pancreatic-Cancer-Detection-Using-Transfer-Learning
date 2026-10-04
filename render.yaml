@@ -29,3 +29,17 @@ services:
         value: 100000
       - key: MAX_UPLOAD_SIZE_MB
         value: 10
+
+  # Next.js Frontend Service
+  - type: web
+    name: pancreatic-cancer-frontend
+    env: node
+    rootDir: pancreatic-frontend
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    plan: free
+    region: oregon
+    autoDeploy: true
+    envVars:
+      - key: NEXT_PUBLIC_API_URL
+        value: https://pancreatic-cancer-detection.onrender.com

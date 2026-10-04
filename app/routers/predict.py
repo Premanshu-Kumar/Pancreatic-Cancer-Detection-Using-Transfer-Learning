@@ -14,6 +14,7 @@ from typing import Optional, List
 
 import cv2
 import numpy as np
+import tensorflow as tf
 from PIL import Image
 from fastapi import APIRouter, UploadFile, File, Form, HTTPException, Request
 
@@ -75,10 +76,11 @@ async def api_predict_image(
     input_tensor = np.expand_dims(img_resized, axis=0)
 
     # Inference
-    prob = float(model.predict(input_tensor)[0])
+    pred_res = model.predict(input_tensor, threshold=optimal_threshold)
+    prob = float(pred_res["probability"])
     is_cancer = prob >= optimal_threshold
-    conf = prob if is_cancer else (1.0 - prob)
-    cls_name = "Cancerous" if is_cancer else "Normal"
+    conf = float(pred_res["confidence"]) / 100.0
+    cls_name = pred_res["class"]
 
     # Optional Grad-CAM++
     heatmap_b64 = None
@@ -86,7 +88,7 @@ async def api_predict_image(
     if generate_gradcam:
         try:
             cam = GradCAMPlusPlus(model.model, model_name=model_name)
-            heatmap = cam.compute_heatmap(input_tensor, pred_index=0)
+            heatmap = cam.compute_heatmap(tf.convert_to_tensor(input_tensor, dtype=tf.float32), pred_index=0)
             raw_boxes = extract_lesion_bounding_boxes(heatmap, threshold=0.55)
             bounding_boxes = [BoundingBox(x=b[0], y=b[1], width=b[2], height=b[3]) for b in raw_boxes]
 
@@ -144,9 +146,10 @@ async def api_predict_batch(
             raw_arr = np.array(pil_img)
             img_resized = cv2.resize(raw_arr, target_size, interpolation=cv2.INTER_LANCZOS4).astype(np.float32) / 255.0
             input_tensor = np.expand_dims(img_resized, axis=0)
-            prob = float(model.predict(input_tensor)[0])
+            pred_res = model.predict(input_tensor, threshold=optimal_threshold)
+            prob = float(pred_res["probability"])
             is_cancer = prob >= optimal_threshold
-            conf = prob if is_cancer else (1.0 - prob)
+            conf = float(pred_res["confidence"]) / 100.0
 
             if is_cancer:
                 cancerous_count += 1

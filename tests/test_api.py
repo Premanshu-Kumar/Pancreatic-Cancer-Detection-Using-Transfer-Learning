@@ -118,6 +118,33 @@ class TestFastAPIEndpoints:
         assert "models" in data
         assert data["total_models"] >= 5
 
+    def test_web_routes_ok(self, client):
+        """Verify all HTML web routes return 200."""
+        for path in ["/", "/detect", "/pacs"]:
+            res = client.get(path)
+            assert res.status_code == 200
+
+    def test_api_report_download(self, client):
+        """Verify clinical PDF report download returns valid PDF bytes."""
+        res = client.get("/api/report/download?patient_id=TEST-001&class_name=Normal&probability=0.08&confidence=0.92&model_name=resnet50")
+        assert res.status_code == 200
+        assert res.headers["content-type"] == "application/pdf"
+        assert res.content.startswith(b"%PDF")
+
+    def test_api_predict_endpoint(self, client, sample_upload_image):
+        """Verify async prediction endpoint executes successfully."""
+        with open(sample_upload_image, "rb") as f:
+            res = client.post(
+                "/api/predict",
+                files={"file": ("test.png", f, "image/png")},
+                data={"model_name": "resnet50", "generate_gradcam": "false"},
+            )
+        assert res.status_code == 200
+        data = res.json()
+        assert "class_name" in data
+        assert data["class_name"] in ["Normal", "Cancerous"]
+        assert 0.0 <= data["probability"] <= 1.0
+
 
 class TestSecuritySanitization:
     """Test suite for payload magic-byte checks and upload sanitization."""

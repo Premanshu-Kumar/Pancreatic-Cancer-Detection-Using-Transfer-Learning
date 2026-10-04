@@ -171,13 +171,19 @@ async def predict_api(
             "model": "RESNET50"
         }
     """
-    loaded_models = _get_loaded_models()
+    from app.main import get_model
+    model = get_model(model_name)
+    if not model:
+        for candidate in [config.DEFAULT_MODEL, "resnet50", "vgg16", "inceptionv3"]:
+            model = get_model(candidate)
+            if model:
+                model_name = candidate
+                break
 
-    if model_name not in loaded_models:
+    if not model:
         raise HTTPException(
             status_code=400,
-            detail=f"Model '{model_name}' not available. "
-                   f"Available: {list(loaded_models.keys())}",
+            detail=f"Model '{model_name}' not available. No checkpoints found in models/ directory.",
         )
 
     ext = Path(file.filename).suffix.lower()
@@ -196,7 +202,6 @@ async def predict_api(
         f.write(content)
 
     try:
-        model = loaded_models[model_name]
         result = model.predict(str(save_path))
         result["model"] = model_name.upper()
         return JSONResponse(content=result)

@@ -12,8 +12,6 @@ from pathlib import Path
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request
-from fastapi.staticfiles import StaticFiles
-from fastapi.templating import Jinja2Templates
 from fastapi.middleware.cors import CORSMiddleware
 
 import config
@@ -119,37 +117,24 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Static files & templates
-app.mount("/static", StaticFiles(directory=str(APP_DIR / "static")), name="static")
-templates = Jinja2Templates(directory=str(APP_DIR / "templates"))
+# Static files & templates removed for Next.js integration
 
 
 # =============================================================================
 # Routes
 # =============================================================================
-@app.get("/")
-async def landing(request: Request):
-    """Render the initial landing page with the fixed video hero section."""
-    return templates.TemplateResponse(
-        "landing.html",
-        {
-            "request": request,
-        },
-    )
+def get_available_model_names():
+    """Return registered model names that have checkpoints on disk or are currently loaded."""
+    checkpoint_models = [
+        name for name in ModelFactory.list_models()
+        if (config.MODELS_DIR / f"{name}_best.keras").exists()
+        or (config.MODELS_DIR / f"{name}_phase2_best.keras").exists()
+    ]
+    if config.DEFAULT_MODEL in checkpoint_models:
+        checkpoint_models.remove(config.DEFAULT_MODEL)
+        checkpoint_models.insert(0, config.DEFAULT_MODEL)
+    return checkpoint_models or list(_loaded_models.keys()) or [config.DEFAULT_MODEL]
 
-
-@app.get("/detect")
-async def detect(request: Request):
-    """Render the 2nd page: Cancer Detection workbench (White-Grey theme)."""
-    available_models = list(_loaded_models.keys())
-    return templates.TemplateResponse(
-        "detect.html",
-        {
-            "request": request,
-            "available_models": available_models,
-            "has_models": len(available_models) > 0,
-        },
-    )
 
 
 from datetime import datetime, timezone
@@ -211,12 +196,14 @@ async def api_models():
     )
 
 
-# Import and include the prediction routers
+# Import and include the prediction and report routers
 from app.routers.prediction import router as prediction_router
 from app.routers.predict import router as predict_api_router
+from app.routers.report import router as report_router
 
 app.include_router(prediction_router)
 app.include_router(predict_api_router)
+app.include_router(report_router)
 
 
 # =============================================================================
